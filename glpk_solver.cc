@@ -1,5 +1,7 @@
-#include "glpk_lp_problem.h"
-#include "glpk_solver.h"
+#include "glpk_lp_problem.hpp"
+#include "glpk_solver.hpp"
+
+#include "logger.hpp"
 
 namespace miner {
 

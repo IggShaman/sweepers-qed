@@ -1,4 +1,4 @@
-/*  Simple mines game with solver.
+/*  Simple landmine game with a solver.
     Copyright (C) 2015 Igor Shevchenko
 
     This program is free software: you can redistribute it and/or modify
@@ -15,14 +15,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "main_window.h"
+#include "main_window.hpp"
+
+#include <QApplication>
 
 int main(int argc, char** argv) {
     QApplication q{argc, argv};
-    qRegisterMetaType<miner::Solver::FeedbackState>("miner::Solver::FeedbackState");
-    qRegisterMetaType<miner::Location>("miner::Location");
-    qRegisterMetaType<size_t>("size_t");
+    
     miner::MainWindow mw;
     mw.show();
+    
     return q.exec();
 }

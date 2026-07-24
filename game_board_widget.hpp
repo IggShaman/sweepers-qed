@@ -1,6 +1,11 @@
 #pragma once
 
-#include "field.h"
+#include "field.hpp"
+
+#include <QtWidgets/QWidget>
+
+#include <cstddef>
+#include <memory>
 
 namespace miner {
 
@@ -9,16 +14,17 @@ using GameBoardPtr = std::shared_ptr<GameBoard>;
 
 class GameBoardWidget : public QWidget {
     Q_OBJECT;
+    
 public:
-    static constexpr size_t kCellSize = 20; // in pixels
+    static constexpr std::size_t kCellSize = 20; // in pixels
     static constexpr float kScaleStep = 0.05;
     static constexpr float kMaxScale = 10.0;
 
-    static constexpr size_t kPointModeScaleStep = 1;
-    static constexpr size_t kDrawBorderScaleStep = 0.5 / kScaleStep;
-    static constexpr size_t kDrawTextScaleStep = 0.2 / kScaleStep;
-    static constexpr size_t kMinScaleStep = 1;
-    static constexpr size_t kMaxScaleStep = kMaxScale / kScaleStep;
+    static constexpr std::size_t kPointModeScaleStep = 1;
+    static constexpr std::size_t kDrawBorderScaleStep = 0.5 / kScaleStep;
+    static constexpr std::size_t kDrawTextScaleStep = 0.2 / kScaleStep;
+    static constexpr std::size_t kMinScaleStep = 1;
+    static constexpr std::size_t kMaxScaleStep = kMaxScale / kScaleStep;
     
     GameBoardWidget();
     
@@ -26,8 +32,8 @@ public:
     void set_board(GameBoardPtr);
     void set_show_mines(bool v) { show_mines_ = v; update(); }
     void update_cell(Location);
-    void update_box(Location center, size_t range);
-    void set_scale_step(size_t step);
+    void update_box(Location center, std::size_t range);
+    void set_scale_step(std::size_t step);
     void set_rw(bool v) { rw_ = v; }
 
 public slots:
@@ -49,12 +55,12 @@ protected:
 private:
     void paint_cell(QPainter&, Location);
     void paint_point_cell(QPainter&, Location);
-    size_t x2col(size_t x) { return is_point_mode() ? 1 : x / get_scale_factor() / kCellSize; }
-    size_t y2row(size_t y) { return is_point_mode() ? 1 : y / get_scale_factor() / kCellSize; }
-    size_t row2y(size_t row) { return is_point_mode() ? 1 : get_scale_factor() * row * kCellSize; }
-    size_t col2x(size_t col) { return is_point_mode() ? 1 : get_scale_factor() * col * kCellSize; }
+    std::size_t x2col(std::size_t x) { return is_point_mode() ? 1 : x / get_scale_factor() / kCellSize; }
+    std::size_t y2row(std::size_t y) { return is_point_mode() ? 1 : y / get_scale_factor() / kCellSize; }
+    std::size_t row2y(std::size_t row) { return is_point_mode() ? 1 : get_scale_factor() * row * kCellSize; }
+    std::size_t col2x(std::size_t col) { return is_point_mode() ? 1 : get_scale_factor() * col * kCellSize; }
     float get_scale_factor() const { return scale_step_ * kScaleStep; }
-    size_t scaled_cell_size() const;
+    std::size_t scaled_cell_size() const;
     void update_widget_size();
     
     GameBoardPtr board_;
@@ -67,8 +73,8 @@ private:
     QFont cell_font_;
     QColor per_nr_colors_text_[8];
     QColor per_nr_colors_box_[8];
-    size_t scale_step_ = 20;
-    size_t prev_scale_step_ = 20; // go back to this when toggling scale mode
+    std::size_t scale_step_ = 20;
+    std::size_t prev_scale_step_ = 20; // go back to this when toggling scale mode
 };
 
 } // namespace miner

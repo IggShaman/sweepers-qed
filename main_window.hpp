@@ -1,7 +1,10 @@
 #pragma once
 
-#include "field.h"
-#include "solver.h"
+#include "field.hpp"
+#include "solver.hpp"
+
+#include <QMainWindow>
+#include <QLabel>
 
 namespace Ui { class MainWindow; }
 

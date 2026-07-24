@@ -1,7 +1,14 @@
-#include "board.h"
-#include "game_board_widget.h"
+#include "board.hpp"
+#include "game_board_widget.hpp"
+
+#include <QPainter>
+#include <QPaintEvent>
 
 namespace miner {
+
+size_t subtract_floor_0(size_t a, size_t b) {
+    return a > b ? a - b : 0;
+}
 
 GameBoardWidget::GameBoardWidget()
     : board_{new miner::GameBoard},
@@ -53,26 +60,33 @@ void GameBoardWidget::set_scale_step(size_t s) {
 void GameBoardWidget::paintEvent(QPaintEvent* ev) {
     QPainter painter{this};
     
-    if (is_point_mode()) {
+    if (is_point_mode())
+    {
 	for (size_t row = (size_t)std::max(0, ev->rect().top());
              row <= (size_t)std::max(0, ev->rect().bottom()); ++row)
+        {
 	    for (size_t col = (size_t)std::max(0, ev->rect().left());
                  col <= (size_t)std::max(0, ev->rect().right()); ++col)
+            {
 		paint_point_cell(painter, {row, col});
-	
-    } else {
+            }
+        }
+    }
+    else
+    {
 	for (size_t row = y2row((size_t)std::max(0, ev->rect().top()));
              row <= y2row((size_t)std::max(0, ev->rect().bottom()));
-             ++row) {
+             ++row)
+        {
 	    for (size_t col = x2col((size_t)std::max(0, ev->rect().left()));
                  col <= x2col((size_t)std::max(0, ev->rect().right()));
-                 ++col) {
+                 ++col)
+            {
 		paint_cell(painter, {row, col});
             }
         }
     }
 }
-
 
 void GameBoardWidget::paint_cell(QPainter& painter, Location l) {
     painter.save();
@@ -190,15 +204,26 @@ void GameBoardWidget::mouseReleaseEvent(QMouseEvent* ev) {
     if (!rw_  or board_->game_lost())
 	return;
     
+    const auto pos = ev->position().toPoint();
+    
     Location l;
     if (is_point_mode())
-	l = {(size_t)std::max(0, ev->y()),
-             (size_t)std::max(0, ev->x())};
+    {
+	l = {
+          (size_t)std::max(0, pos.y()),
+          (size_t)std::max(0, pos.x())
+        };
+    }
     else
-	l = {y2row((size_t)std::max(0, ev->y())),
-             x2col((size_t)std::max(0, ev->x()))};
+    {
+	l = {
+          y2row((size_t)std::max(0, pos.y())),
+          x2col((size_t)std::max(0, pos.x()))
+        };
+    }
     
-    switch(ev->button()) {
+    switch(ev->button())
+    {
     case Qt::LeftButton: {
 	//NOTE: no modifiers pressed
 	if (board_->at(l) != GameBoard::CellInfo::Unknown)
@@ -261,15 +286,15 @@ void GameBoardWidget::update_cell(Location l) {
 void GameBoardWidget::update_box(Location center, size_t range) {
     if (is_point_mode()) {
 	update(
-          i::subtract_floor_0(center.col, range),
-          i::subtract_floor_0(center.row, range),
+          subtract_floor_0(center.col, range),
+          subtract_floor_0(center.row, range),
           1 + range * 2,
           1 + range * 2);
 	
     } else {
 	update(
-          col2x(i::subtract_floor_0(center.col, range)),
-          row2y(i::subtract_floor_0(center.row, range)),
+          col2x(subtract_floor_0(center.col, range)),
+          row2y(subtract_floor_0(center.row, range)),
           (1 + range * 2) * scaled_cell_size(),
           (1 + range * 2) * scaled_cell_size());
     }

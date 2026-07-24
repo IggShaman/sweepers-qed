@@ -1,17 +1,26 @@
-#include "solver.h"
+#include "solver.hpp"
+#include "logger.hpp"
+
+#include <thread>
 
 namespace miner {
 
-Solver::~Solver() {
+Solver::~Solver()
+{
     stop();
+    
     if (thread_.joinable())
+    {
 	thread_.join();
+    }
 }
 
-void Solver::startAsync() {
+void Solver::startAsync()
+{
     I_ASSERT(
       state_ == RunState::kNew,
       EX_LOG("state==" << static_cast<int>(state_.load()) << " != kNew"));
+    
     I_ASSERT(
       !thread_.joinable(),
       EX_LOG("thread is joinable"));
@@ -19,7 +28,6 @@ void Solver::startAsync() {
     state_ = RunState::kSuspended;
     thread_ = std::thread(&Solver::asyncSolver, this);
 }
-
 
 bool Solver::isRunning() const {
     return RunState::kRunning == state_

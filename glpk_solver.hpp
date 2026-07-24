@@ -1,7 +1,6 @@
 #pragma once
 
-#include "solver.h"
-#include "board.h"
+#include "solver.hpp"
 
 namespace lp { class problem; }
 

@@ -1,5 +1,10 @@
 #pragma once
 
+#include <vector>
+#include <string>
+
+#include <glpk.h>
+
 namespace lp {
 
 class matrix {
@@ -108,4 +113,4 @@ private:
 
 } // namespace lp
 
-#include "glpk_lp_problem_inl.h"
+#include "glpk_lp_problem_inl.hpp"

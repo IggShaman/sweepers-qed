@@ -1,4 +1,5 @@
-#include "glpk_lp_problem.h"
+#include "glpk_lp_problem.hpp"
+#include "logger.hpp"
 
 namespace lp {
 
@@ -117,7 +118,7 @@ std::string problem::dump() {
 	    
 	default:
 	    xlog << "unhandled column type " << t << "\n";
-	    DIE();
+            std::abort();
 	};
     }
     

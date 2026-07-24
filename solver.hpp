@@ -1,6 +1,10 @@
 #pragma once
 
-#include "board.h"
+#include "board.hpp"
+
+#include <thread>
+#include <deque>
+#include <condition_variable>
 
 namespace miner {
 

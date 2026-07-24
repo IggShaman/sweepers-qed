@@ -1,4 +1,6 @@
-#include "board.h"
+#include "board.hpp"
+
+#include <iostream>
 
 namespace miner {
 
