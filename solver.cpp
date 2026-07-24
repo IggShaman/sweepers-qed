@@ -96,7 +96,7 @@ Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition l) const {
     case GameBoard::CellInfo::N6:
     case GameBoard::CellInfo::N7:
     case GameBoard::CellInfo::N8:
-        rv.mines_nr = static_cast<size_t>(ci);
+        rv.landmines_count = static_cast<size_t>(ci);
         break;
     };
 
@@ -105,7 +105,7 @@ Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition l) const {
         while (it) {
             switch (it.at()) {
             case GameBoard::CellInfo::MarkedMine:
-                --rv.mines_nr;
+                --rv.landmines_count;
                 break;
 
             case GameBoard::CellInfo::Unknown:

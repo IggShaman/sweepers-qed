@@ -43,7 +43,7 @@ protected:
     virtual bool doPoi(landmine::FieldPosition) = 0;
 
     struct NeighborhoodInfo {
-        uint8_t mines_nr{}; // number of mines left around current cell
+        uint8_t landmines_count{}; // number of landmines left around current cell
         uint8_t nr{};       // size of "coveredUnmarkedFieldPositions" array
         std::array<FieldPosition, 8> coveredUnmarkedFieldPositions;
     };

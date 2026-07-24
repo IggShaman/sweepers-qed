@@ -30,7 +30,10 @@ public:
     
     GameBoardPtr board() { return board_; }
     void set_board(GameBoardPtr);
-    void set_show_mines(bool v) { show_mines_ = v; update(); }
+    void set_show_landmines(bool v) {
+        show_landmines_ = v;
+        update();
+    }
     void update_cell(FieldPosition);
     void update_box(FieldPosition center, std::size_t range);
     void set_scale_step(std::size_t step);
@@ -64,15 +67,15 @@ private:
     void update_widget_size();
     
     GameBoardPtr board_;
-    bool show_mines_{};
+    bool show_landmines_{};
     bool rw_{};
     
     QColor cell_border_;
     QColor cell_opened_bg_;
     QColor cell_unknown_bg_;
     QFont cell_font_;
-    QColor per_nr_colors_text_[8];
-    QColor per_nr_colors_box_[8];
+    QColor per_count_colors_text_[8];
+    QColor per_count_colors_box_[8];
     std::size_t scale_step_ = 20;
     std::size_t prev_scale_step_ = 20; // go back to this when toggling scale mode
 };

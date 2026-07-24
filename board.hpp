@@ -30,14 +30,14 @@ public:
     void uncovered_safe(FieldPosition, uint8_t);
     size_t rows() const { return field_->rows(); }
     size_t cols() const { return field_->cols(); }
-    size_t mines_marked() const { return mines_marked_; }
+    size_t landmines_marked() const { return landmines_marked_; }
     FieldCPtr field() const { return field_; }
     CellNeighborhoodIterator neighborhood(FieldPosition);
     bool is_uncovered(FieldPosition l) const { return static_cast<int>(at(l)) >= 0; }
     bool game_lost() const { return game_lost_; }
     void set_game_lost() { game_lost_ = true; }
-    size_t uncovered_nr() const { return uncovered_nr_; }
-    size_t left_nr() const { return data_.size() - uncovered_nr_ - mines_marked_; }
+    size_t uncovered_count() const { return uncovered_count_; }
+    size_t left_count() const { return data_.size() - uncovered_count_ - landmines_marked_; }
     void dump_region(FieldPosition, size_t range) const;
 
 private:
@@ -46,8 +46,8 @@ private:
 
     FieldPtr field_;
     std::vector<CellInfo> data_;
-    size_t mines_marked_{};
-    size_t uncovered_nr_{};
+    size_t landmines_marked_{};
+    size_t uncovered_count_{};
     bool game_lost_{};
 };
 

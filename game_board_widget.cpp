@@ -13,10 +13,10 @@ size_t subtract_floor_0(size_t a, size_t b) {
 GameBoardWidget::GameBoardWidget()
     : board_{new landmine::GameBoard}, cell_border_{200, 200, 200}, cell_opened_bg_{220, 220, 220},
       cell_unknown_bg_{100, 100, 100},
-      per_nr_colors_text_{Qt::black,       Qt::darkBlue, Qt::darkGreen, Qt::darkCyan,
-                          Qt::darkMagenta, Qt::black,    Qt::black,     Qt::black},
-      per_nr_colors_box_{Qt::black,   Qt::blue,   Qt::green,  Qt::cyan,
-                         Qt::magenta, Qt::yellow, Qt::yellow, Qt::yellow} {
+      per_count_colors_text_{Qt::black,       Qt::darkBlue, Qt::darkGreen, Qt::darkCyan,
+                             Qt::darkMagenta, Qt::black,    Qt::black,     Qt::black},
+      per_count_colors_box_{Qt::black,   Qt::blue,   Qt::green,  Qt::cyan,
+                            Qt::magenta, Qt::yellow, Qt::yellow, Qt::yellow} {
     cell_font_.setPixelSize(kCellSize - 4);
     cell_font_.setBold(true);
     board_->set_field(std::make_shared<Field>());
@@ -118,16 +118,16 @@ void GameBoardWidget::paint_cell(QPainter& painter, FieldPosition l) {
     case GameBoard::CellInfo::N8:
         if (scale_step_ >= kDrawTextScaleStep) {
             painter.fillRect(r, cell_opened_bg_);
-            painter.setPen(per_nr_colors_text_[static_cast<int>(ci)]);
+            painter.setPen(per_count_colors_text_[static_cast<int>(ci)]);
             painter.drawText(1, kCellSize - 1, QString::number(static_cast<int>(ci)));
 
         } else {
-            painter.fillRect(r, per_nr_colors_box_[static_cast<int>(ci)]);
+            painter.fillRect(r, per_count_colors_box_[static_cast<int>(ci)]);
         }
         break;
     };
 
-    if (show_mines_ and board_->field()->is_mined(l)) {
+    if (show_landmines_ and board_->field()->is_landmine(l)) {
         if (scale_step_ >= kDrawTextScaleStep) {
             painter.setPen(Qt::red);
             for (size_t r = 1; r < 8; ++r)
@@ -153,7 +153,7 @@ void GameBoardWidget::paint_point_cell(QPainter& painter, FieldPosition l) {
         break;
 
     case GameBoard::CellInfo::Unknown:
-        if (show_mines_ and board_->field()->is_mined(l))
+        if (show_landmines_ and board_->field()->is_landmine(l))
             painter.setPen(Qt::darkRed);
         else
             painter.setPen(cell_unknown_bg_);
@@ -171,7 +171,7 @@ void GameBoardWidget::paint_point_cell(QPainter& painter, FieldPosition l) {
     case GameBoard::CellInfo::N6:
     case GameBoard::CellInfo::N7:
     case GameBoard::CellInfo::N8:
-        painter.setPen(per_nr_colors_box_[static_cast<int>(ci)]);
+        painter.setPen(per_count_colors_box_[static_cast<int>(ci)]);
         break;
     };
 
@@ -198,13 +198,13 @@ void GameBoardWidget::mouseReleaseEvent(QMouseEvent* ev) {
             return;
 
         ev->accept();
-        if (board_->field()->is_mined(l)) {
+        if (board_->field()->is_landmine(l)) {
             board_->mark_exploded(l);
             emit cell_changed(l);
             emit game_lost();
 
         } else {
-            board_->uncovered_safe(l, board_->field()->nearby_mines_nr(l));
+            board_->uncovered_safe(l, board_->field()->nearby_landmines_count(l));
             emit cell_changed(l);
         }
 

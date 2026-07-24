@@ -38,10 +38,10 @@ MainWindow::MainWindow() : ui_{new Ui::MainWindow} {
     connect(a, &QAction::triggered, this, &MainWindow::configure_field);
     ui_->toolBar->addAction(a);
 
-    show_mines_action_ = a = new QAction("Show &mines", this);
-    a->setStatusTip("Show mines");
+    show_landmines_action_ = a = new QAction("Show &landmines", this);
+    a->setStatusTip("Show landmines");
     a->setCheckable(true);
-    connect(a, &QAction::toggled, this, &MainWindow::show_mines_toggled);
+    connect(a, &QAction::toggled, this, &MainWindow::show_landmines_toggled);
     ui_->toolBar->addAction(a);
 
     run_solver_action_ = a = new QAction("&Solve", this);
@@ -70,8 +70,8 @@ MainWindow::MainWindow() : ui_{new Ui::MainWindow} {
     a->setCheckable(true);
     ui_->toolBar->addAction(a);
 
-    mines_info_label_ = new QLabel();
-    statusBar()->addPermanentWidget(mines_info_label_);
+    landmines_info_label_ = new QLabel();
+    statusBar()->addPermanentWidget(landmines_info_label_);
 
     gen_new();
 }
@@ -90,10 +90,10 @@ void MainWindow::setup_solver() {
 }
 
 void MainWindow::gen_new() {
-    show_mines_action_->setChecked(false);
+    show_landmines_action_->setChecked(false);
 
     auto field = std::make_shared<Field>();
-    field->gen_random(new_rows_, new_cols_, new_mines_);
+    field->gen_random(new_rows_, new_cols_, new_landmines_);
 
     auto board = std::make_shared<GameBoard>();
     board->set_field(field);
@@ -109,19 +109,19 @@ void MainWindow::configure_field() {
     ui.setupUi(&d);
     ui.rows_sb->setValue(new_rows_);
     ui.cols_sb->setValue(new_cols_);
-    ui.mines_sb->setValue(new_mines_);
+    ui.landmines_sb->setValue(new_landmines_);
     if (!d.exec()) {
         return;
     }
 
     new_rows_ = ui.rows_sb->value();
     new_cols_ = ui.cols_sb->value();
-    new_mines_ = ui.mines_sb->value();
+    new_landmines_ = ui.landmines_sb->value();
     gen_new();
 }
 
-void MainWindow::show_mines_toggled(bool v) {
-    game_board_widget_->set_show_mines(v);
+void MainWindow::show_landmines_toggled(bool v) {
+    game_board_widget_->set_show_landmines(v);
 }
 
 void MainWindow::run_solver(bool v) {
@@ -140,7 +140,7 @@ void MainWindow::run_solver(bool v) {
 void MainWindow::action_about() {
     QMessageBox::about(
         this, "Landmine",
-        "Landmine: a simple mines game with solver.\n"
+        "Landmine: a simple landmines game with solver.\n"
         "Copyright (C) 2015-2018 Igor Shevchenko <igor.shevchenko@gmail.com>\n"
         "This program comes with ABSOLUTELY NO WARRANTY.\n"
         "This is free software, and you are welcome to redistribute it\n"
@@ -153,16 +153,16 @@ void MainWindow::cell_changed(landmine::FieldPosition l) {
 }
 
 void MainWindow::update_cell_info() {
-    mines_info_label_->setText(QString("Mines: %1 / %2 Uncovered: %3 Left: %4")
-                                   .arg(game_board_widget_->board()->mines_marked())
-                                   .arg(game_board_widget_->board()->field()->mines_nr())
-                                   .arg(game_board_widget_->board()->uncovered_nr())
-                                   .arg(game_board_widget_->board()->left_nr()));
+    landmines_info_label_->setText(QString("Landmines: %1 / %2 Uncovered: %3 Left: %4")
+                                       .arg(game_board_widget_->board()->landmines_marked())
+                                       .arg(game_board_widget_->board()->field()->landmines_count())
+                                       .arg(game_board_widget_->board()->uncovered_count())
+                                       .arg(game_board_widget_->board()->left_count()));
 }
 
 void MainWindow::game_lost() {
     game_board_widget_->board()->set_game_lost();
-    show_mines_action_->setChecked(true);
+    show_landmines_action_->setChecked(true);
 }
 
 void MainWindow::solver_result_slot(Solver::FeedbackState feedback_state, landmine::FieldPosition l,

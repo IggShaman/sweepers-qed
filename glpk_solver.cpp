@@ -35,7 +35,7 @@ bool GlpkSolver::doPoi(landmine::FieldPosition poi) {
         auto obj = lp->get_objective_value();
         if (obj <= 1 - kEpsilon) {
             // can't have a mine here
-            if (board_->field()->is_mined(v.first)) {
+            if (board_->field()->is_landmine(v.first)) {
                 xlog << "ERROR: game is lost at " << v.first << ": shold've been empty, has a mine"
                      << "\nobj=" << obj << "\npoi=" << poi << "\nLP: " << lp->dump() << "\n";
                 board_->dump_region(poi, 3);
@@ -43,7 +43,7 @@ bool GlpkSolver::doPoi(landmine::FieldPosition poi) {
                 return false;
             }
 
-            board_->uncovered_safe(v.first, board_->field()->nearby_mines_nr(v.first));
+            board_->uncovered_safe(v.first, board_->field()->nearby_landmines_count(v.first));
             lp->set_column_fixed_bound(v.second, 0);
             addPoi(v.first);
 
@@ -52,7 +52,7 @@ bool GlpkSolver::doPoi(landmine::FieldPosition poi) {
             lp->solve();
             auto obj = lp->get_objective_value();
             if (obj >= kEpsilon) { // must have a mine here
-                if (!board_->field()->is_mined(v.first)) {
+                if (!board_->field()->is_landmine(v.first)) {
                     xlog << "ERROR: calculated " << v.first << " to contain a mine, but it doesn't"
                          << "\nobj=" << obj << "\npoi=" << poi << "\nLP: " << lp->dump() << "\n";
                     board_->dump_region(poi, 3);
@@ -74,7 +74,7 @@ bool GlpkSolver::doPoi(landmine::FieldPosition poi) {
 void GlpkSolver::prepare(lp::problem* lp, FieldPosition poi, VariablesMapType& vars) {
     std::ostringstream oss;
 
-    int vars_nr{};
+    int vars_count{};
 
     //
     // setup initial LP
@@ -99,13 +99,13 @@ void GlpkSolver::prepare(lp::problem* lp, FieldPosition poi, VariablesMapType& v
 
             oss.str("");
             oss << 'n' << l;
-            rows.push_back({pois.mines_nr, oss.str()});
+            rows.push_back({pois.landmines_count, oss.str()});
 
             for (uint8_t i = 0; i < pois.nr; ++i) {
                 // find/add column variable for an uncovered cell
-                auto iv = vars.insert({pois.coveredUnmarkedFieldPositions[i], vars_nr + 1});
+                auto iv = vars.insert({pois.coveredUnmarkedFieldPositions[i], vars_count + 1});
                 if (iv.second)
-                    ++vars_nr;
+                    ++vars_count;
 
                 // set coefficient to 1
                 m.add(rows.size(), iv.first->second, 1);
@@ -113,7 +113,7 @@ void GlpkSolver::prepare(lp::problem* lp, FieldPosition poi, VariablesMapType& v
         }
     }
 
-    if (!vars_nr)
+    if (!vars_count)
         return;
 
     //

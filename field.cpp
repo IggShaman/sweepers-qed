@@ -3,7 +3,7 @@
 namespace landmine {
 
 void Field::reset(size_t rows, size_t cols) {
-    mines_nr_ = 0;
+    landmines_count_ = 0;
     rows_ = rows;
     cols_ = cols;
     data_.resize(rows_ * cols_);
@@ -14,65 +14,65 @@ size_t Field::to_index(FieldPosition l) const {
     return l.row * cols_ + l.col;
 }
 
-void Field::mark_mined(FieldPosition l, bool v) {
+void Field::mark_landmine(FieldPosition l, bool v) {
     auto idx = to_index(l);
     if (data_[idx]) {
         if (!v) {
             data_[idx] = false;
-            mines_nr_--;
+            landmines_count_--;
         }
 
     } else {
         if (v) {
             data_[idx] = true;
-            ++mines_nr_;
+            ++landmines_count_;
         }
     }
 }
 
-void Field::gen_random(size_t rows, size_t cols, size_t mines_nr) {
+void Field::gen_random(size_t rows, size_t cols, size_t landmines_count) {
     srand48(time(nullptr));
     reset(rows, cols);
 
     // TODO: throw exception?
-    if (mines_nr >= rows * cols)
+    if (landmines_count >= rows * cols)
         return;
 
     // For low fill rates (<= 30%), this should work well.
-    mines_nr_ = mines_nr;
-    while (mines_nr) {
+    landmines_count_ = landmines_count;
+    while (landmines_count) {
         FieldPosition l{size_t(drand48() * rows_), size_t(drand48() * cols_)};
-        if (is_mined(l))
+        if (is_landmine(l))
             continue;
 
         data_[to_index(l)] = true;
-        --mines_nr;
+        --landmines_count;
     }
 }
 
-uint8_t Field::nearby_mines_nr(FieldPosition l) const {
+uint8_t Field::nearby_landmines_count(FieldPosition l) const {
     uint8_t nr{};
 
     if (l.row > 0) {
         if (l.col > 0)
-            nr += is_mined({l.row - 1, l.col - 1});
-        nr += is_mined({l.row - 1, l.col});
+            nr += is_landmine({l.row - 1, l.col - 1});
+        nr += is_landmine({l.row - 1, l.col});
         if (l.col < cols_ - 1)
-            nr += is_mined({l.row - 1, l.col + 1});
+            nr += is_landmine({l.row - 1, l.col + 1});
     }
 
     if (l.col > 0)
-        nr += is_mined({l.row, l.col - 1});
+        nr += is_landmine({l.row, l.col - 1});
 
     if (l.col < cols_ - 1)
-        nr += is_mined({l.row, l.col + 1});
+        nr += is_landmine({l.row, l.col + 1});
 
     if (l.row < rows_ - 1) {
         if (l.col > 0)
-            nr += is_mined({l.row + 1, l.col - 1});
-        nr += is_mined({l.row + 1, l.col});
+            nr += is_landmine({l.row + 1, l.col - 1});
+        nr += is_landmine({l.row + 1, l.col});
         if (l.col < cols_ - 1)
-            nr += is_mined({l.row + 1, l.col + 1});
+            nr += is_landmine({l.row + 1, l.col + 1});
     }
 
     return nr;

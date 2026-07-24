@@ -22,7 +22,7 @@ private slots:
     void action_about();
     void gen_new();
     void configure_field();
-    void show_mines_toggled(bool);
+    void show_landmines_toggled(bool);
     void run_solver(bool);
     void cell_changed(landmine::FieldPosition);
     void game_lost();
@@ -39,11 +39,11 @@ private:
     
     size_t new_rows_{3};
     size_t new_cols_{3};
-    size_t new_mines_{2};
-    
+    size_t new_landmines_{2};
+
     QAction* run_solver_action_{};
-    QAction* show_mines_action_{};
-    QLabel* mines_info_label_{};
+    QAction* show_landmines_action_{};
+    QLabel* landmines_info_label_{};
 };
 
 } // namespace landmine

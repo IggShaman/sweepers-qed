@@ -6,7 +6,7 @@ namespace landmine {
 
 void GameBoard::uncovered_safe(FieldPosition l, uint8_t v) {
     edit_at(l) = static_cast<CellInfo>(v);
-    ++uncovered_nr_;
+    ++uncovered_count_;
 }
 
 void GameBoard::set_field(FieldPtr field) {
@@ -49,14 +49,14 @@ void GameBoard::mark_mine(FieldPosition l, bool v) {
             return;
 
         ci = CellInfo::MarkedMine;
-        ++mines_marked_;
+        ++landmines_marked_;
 
     } else {
         if (ci != CellInfo::MarkedMine)
             return;
 
         ci = CellInfo::Unknown;
-        --mines_marked_;
+        --landmines_marked_;
     }
 }
 
@@ -79,7 +79,7 @@ void GameBoard::dump_region(FieldPosition poi, size_t range) const {
                 break;
 
             case GameBoard::CellInfo::MarkedMine:
-                if (field_->is_mined(l))
+                if (field_->is_landmine(l))
                     ch = '*';
                 else
                     ch = '%';
