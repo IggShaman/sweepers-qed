@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <memory>
 
-namespace miner {
+namespace landmine {
 
 class GameBoard;
 using GameBoardPtr = std::shared_ptr<GameBoard>;
@@ -43,7 +43,7 @@ public slots:
     void switch_point_mode(bool);
     
 signals:
-    void cell_changed(miner::Location);
+    void cell_changed(landmine::Location);
     void game_lost();
     
 protected:
@@ -77,4 +77,4 @@ private:
     std::size_t prev_scale_step_ = 20; // go back to this when toggling scale mode
 };
 
-} // namespace miner
+} // namespace landmine

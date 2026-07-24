@@ -6,7 +6,7 @@
 #include <deque>
 #include <condition_variable>
 
-namespace miner {
+namespace landmine {
 
 class Solver {
     static constexpr const size_t kUpdateRange = 1;
@@ -39,8 +39,8 @@ public:
     void setResultHandler(ResultHandler h) { resultHandler_ = h; }
     
 protected:
-    virtual bool doPoi(miner::Location) = 0;
-    
+    virtual bool doPoi(landmine::Location) = 0;
+
     struct NeighborhoodInfo {
         uint8_t mines_nr{}; // number of mines left around current cell
         uint8_t nr{};       // size of "coveredUnmarkedLocations" array
@@ -65,4 +65,4 @@ private:
     std::condition_variable cond_;
 };
 
-} // namespace miner
+} // namespace landmine

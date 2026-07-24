@@ -3,7 +3,7 @@
 
 #include <thread>
 
-namespace miner {
+namespace landmine {
 
 Solver::~Solver() {
     stop();
@@ -149,4 +149,4 @@ void Solver::asyncSolver() {
     }
 }
 
-} // namespace miner
+} // namespace landmine

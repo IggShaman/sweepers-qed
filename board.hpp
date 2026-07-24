@@ -2,7 +2,7 @@
 
 #include "field.hpp"
 
-namespace miner {
+namespace landmine {
 
 class CellNeighborhoodIterator;
 
@@ -73,4 +73,4 @@ GameBoard::neighborhood(Location l) {
     return CellNeighborhoodIterator(this, l);
 }
 
-} // namespace miner
+} // namespace landmine

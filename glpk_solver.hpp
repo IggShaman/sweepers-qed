@@ -4,7 +4,7 @@
 
 namespace lp { class problem; }
 
-namespace miner {
+namespace landmine {
 
 class GlpkSolver : public Solver {
 public:
@@ -15,9 +15,9 @@ public:
 private:
     // maps location to variable id in an LP
     using VariablesMapType = std::unordered_map<Location, int>;
-    
-    void prepare(lp::problem*, miner::Location, VariablesMapType&);
-    bool doPoi(miner::Location) override;
+
+    void prepare(lp::problem*, landmine::Location, VariablesMapType&);
+    bool doPoi(landmine::Location) override;
 };
 
-} // namespace miner
+} // namespace landmine

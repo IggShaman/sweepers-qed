@@ -5,8 +5,7 @@
 #include <ostream>
 #include <memory>
 
-namespace miner
-{
+namespace landmine {
 
 // Represents a coordinate on a field.
 struct Location
@@ -29,26 +28,24 @@ inline size_t hash_mix(size_t x) {   // splitmix64 finalizer
     return x ^ (x >> 31);
 }
 
-} // namespace miner
+} // namespace landmine
 
 namespace std {
 
-template<>
-struct hash<miner::Location> {
-    std::size_t operator()(const miner::Location& l) const
-    {
-        return miner::hash_mix(l.row * 0x9e3779b97f4a7c15ULL + l.col);
+template <> struct hash<landmine::Location> {
+    std::size_t operator()(const landmine::Location& l) const {
+        return landmine::hash_mix(l.row * 0x9e3779b97f4a7c15ULL + l.col);
     }
 };
 
-inline ostream& operator<<(ostream& os, const miner::Location& l) {
+inline ostream& operator<<(ostream& os, const landmine::Location& l) {
     os << '(' << l.row << ' ' << l.col << ')';
     return os;
 }
 
 } // namespace std
 
-namespace miner {
+namespace landmine {
 
 //
 // Represents a true mine field.
@@ -76,4 +73,4 @@ private:
 using FieldPtr = std::shared_ptr<Field>;
 using FieldCPtr = std::shared_ptr<const Field>;
 
-} // namespace miner
+} // namespace landmine

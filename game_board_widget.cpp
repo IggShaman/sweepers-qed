@@ -4,14 +4,14 @@
 #include <QPaintEvent>
 #include <QPainter>
 
-namespace miner {
+namespace landmine {
 
 size_t subtract_floor_0(size_t a, size_t b) {
     return a > b ? a - b : 0;
 }
 
 GameBoardWidget::GameBoardWidget()
-    : board_{new miner::GameBoard}, cell_border_{200, 200, 200}, cell_opened_bg_{220, 220, 220},
+    : board_{new landmine::GameBoard}, cell_border_{200, 200, 200}, cell_opened_bg_{220, 220, 220},
       cell_unknown_bg_{100, 100, 100},
       per_nr_colors_text_{Qt::black,       Qt::darkBlue, Qt::darkGreen, Qt::darkCyan,
                           Qt::darkMagenta, Qt::black,    Qt::black,     Qt::black},
@@ -288,4 +288,4 @@ size_t GameBoardWidget::scaled_cell_size() const {
     return is_point_mode() ? 1 : get_scale_factor() * kCellSize;
 }
 
-} // namespace miner
+} // namespace landmine

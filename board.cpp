@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace miner {
+namespace landmine {
 
 void GameBoard::uncovered_safe(Location l, uint8_t v) {
     edit_at(l) = static_cast<CellInfo>(v);
@@ -106,4 +106,4 @@ void GameBoard::dump_region(Location poi, size_t range) const {
     }
 }
 
-} // namespace miner
+} // namespace landmine

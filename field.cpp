@@ -1,6 +1,6 @@
 #include "field.hpp"
 
-namespace miner {
+namespace landmine {
 
 void Field::reset(size_t rows, size_t cols) {
     mines_nr_ = 0;
@@ -78,4 +78,4 @@ uint8_t Field::nearby_mines_nr(Location l) const {
     return nr;
 }
 
-} // namespace miner
+} // namespace landmine

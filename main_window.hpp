@@ -8,7 +8,7 @@
 
 namespace Ui { class MainWindow; }
 
-namespace miner {
+namespace landmine {
 
 class GameBoardWidget;
 
@@ -24,11 +24,11 @@ private slots:
     void configure_field();
     void show_mines_toggled(bool);
     void run_solver(bool);
-    void cell_changed(miner::Location);
+    void cell_changed(landmine::Location);
     void game_lost();
-    void solver_result_slot(
-      miner::Solver::FeedbackState, miner::Location center, size_t range);
-    
+    void solver_result_slot(landmine::Solver::FeedbackState, landmine::Location center,
+                            size_t range);
+
 private:
     void update_cell_info();
     void setup_solver();
@@ -46,4 +46,4 @@ private:
     QLabel* mines_info_label_{};
 };
 
-} // namespace miner
+} // namespace landmine

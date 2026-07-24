@@ -9,7 +9,7 @@
 #include <QMessageBox>
 #include <QtGui/QAction>
 
-namespace miner {
+namespace landmine {
 
 MainWindow::~MainWindow() {}
 
@@ -81,7 +81,7 @@ void MainWindow::setup_solver() {
 
     solver_.reset(new GlpkSolver{board});
 
-    solver_->setResultHandler([this](auto ft, miner::Location l, size_t range) {
+    solver_->setResultHandler([this](auto ft, landmine::Location l, size_t range) {
         // QThread::usleep(0); // slow down a bit for nice animation effect
         QMetaObject::invokeMethod(
             this, [this, ft, l, range] { solver_result_slot(ft, l, range); }, Qt::QueuedConnection);
@@ -139,15 +139,15 @@ void MainWindow::run_solver(bool v) {
 
 void MainWindow::action_about() {
     QMessageBox::about(
-        this, "Miner",
-        "Miner: a simple mines game with solver.\n"
+        this, "Landmine",
+        "Landmine: a simple mines game with solver.\n"
         "Copyright (C) 2015-2018 Igor Shevchenko <igor.shevchenko@gmail.com>\n"
         "This program comes with ABSOLUTELY NO WARRANTY.\n"
         "This is free software, and you are welcome to redistribute it\n"
         "under certain conditions. Look here for GPL3 license: http://www.gnu.org/licenses/");
 }
 
-void MainWindow::cell_changed(miner::Location l) {
+void MainWindow::cell_changed(landmine::Location l) {
     solver_->addPoi(l);
     update_cell_info();
 }
@@ -165,7 +165,7 @@ void MainWindow::game_lost() {
     show_mines_action_->setChecked(true);
 }
 
-void MainWindow::solver_result_slot(Solver::FeedbackState feedback_state, miner::Location l,
+void MainWindow::solver_result_slot(Solver::FeedbackState feedback_state, landmine::Location l,
                                     size_t range) {
     switch (feedback_state) {
     case Solver::FeedbackState::kSolved:
@@ -185,4 +185,4 @@ void MainWindow::solver_result_slot(Solver::FeedbackState feedback_state, miner:
     };
 }
 
-} // namespace miner
+} // namespace landmine

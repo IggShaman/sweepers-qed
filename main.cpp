@@ -21,8 +21,8 @@
 
 int main(int argc, char** argv) {
     QApplication q{argc, argv};
-    
-    miner::MainWindow mw;
+
+    landmine::MainWindow mw;
     mw.show();
     
     return q.exec();
