@@ -70,12 +70,12 @@ void Solver::stop() {
     cond_.notify_one();
 }
 
-void Solver::addPoi(Location l) {
+void Solver::addPoi(FieldPosition l) {
     std::lock_guard<std::mutex> lock{queue_mtx_};
     poi_.push_back(l);
 }
 
-Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(Location l) const {
+Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition l) const {
     NeighborhoodInfo rv;
 
     auto ci = board_->at(l);
@@ -109,7 +109,7 @@ Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(Location l) const {
                 break;
 
             case GameBoard::CellInfo::Unknown:
-                rv.coveredUnmarkedLocations[rv.nr++] = *it;
+                rv.coveredUnmarkedFieldPositions[rv.nr++] = *it;
                 break;
 
             default:
@@ -125,14 +125,14 @@ Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(Location l) const {
 
 void Solver::asyncSolver() {
     while (okToRun()) {
-        Location poi;
+        FieldPosition poi;
 
         {
             std::unique_lock<std::mutex> lock{queue_mtx_};
             if (poi_.empty()) {
                 lock.unlock();
                 state_ = RunState::kSuspended;
-                resultHandler_(FeedbackState::kSuspended, Location{}, 0);
+                resultHandler_(FeedbackState::kSuspended, FieldPosition{}, 0);
                 continue;
             }
 

@@ -4,7 +4,7 @@
 
 namespace landmine {
 
-void GameBoard::uncovered_safe(Location l, uint8_t v) {
+void GameBoard::uncovered_safe(FieldPosition l, uint8_t v) {
     edit_at(l) = static_cast<CellInfo>(v);
     ++uncovered_nr_;
 }
@@ -15,7 +15,8 @@ void GameBoard::set_field(FieldPtr field) {
     std::fill(data_.begin(), data_.end(), CellInfo::Unknown);
 }
 
-CellNeighborhoodIterator::CellNeighborhoodIterator(GameBoard* board, Location l) : board_{board} {
+CellNeighborhoodIterator::CellNeighborhoodIterator(GameBoard* board, FieldPosition l)
+    : board_{board} {
 
     end_ = 0;
     if (l.row > 0) {
@@ -40,7 +41,7 @@ CellNeighborhoodIterator::CellNeighborhoodIterator(GameBoard* board, Location l)
     }
 }
 
-void GameBoard::mark_mine(Location l, bool v) {
+void GameBoard::mark_mine(FieldPosition l, bool v) {
     auto& ci = edit_at(l);
 
     if (v) {
@@ -59,7 +60,7 @@ void GameBoard::mark_mine(Location l, bool v) {
     }
 }
 
-void GameBoard::dump_region(Location poi, size_t range) const {
+void GameBoard::dump_region(FieldPosition poi, size_t range) const {
     std::cout << "center=" << poi << "\n";
     size_t col0 = poi.col > range + 1 ? poi.col - range - 1 : 0;
     size_t col1 = std::min(cols() - 1, poi.col + range + 1);
@@ -69,7 +70,7 @@ void GameBoard::dump_region(Location poi, size_t range) const {
 
         std::cout << row << ": ";
         for (size_t col = col0; col <= col1; ++col) {
-            Location l{row, col};
+            FieldPosition l{row, col};
             char ch{};
             auto v = at(l);
             switch (v) {

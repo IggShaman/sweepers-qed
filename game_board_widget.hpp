@@ -31,8 +31,8 @@ public:
     GameBoardPtr board() { return board_; }
     void set_board(GameBoardPtr);
     void set_show_mines(bool v) { show_mines_ = v; update(); }
-    void update_cell(Location);
-    void update_box(Location center, std::size_t range);
+    void update_cell(FieldPosition);
+    void update_box(FieldPosition center, std::size_t range);
     void set_scale_step(std::size_t step);
     void set_rw(bool v) { rw_ = v; }
 
@@ -43,7 +43,7 @@ public slots:
     void switch_point_mode(bool);
     
 signals:
-    void cell_changed(landmine::Location);
+    void cell_changed(landmine::FieldPosition);
     void game_lost();
     
 protected:
@@ -53,8 +53,8 @@ protected:
     bool is_point_mode() const { return scale_step_ == kPointModeScaleStep; }
     
 private:
-    void paint_cell(QPainter&, Location);
-    void paint_point_cell(QPainter&, Location);
+    void paint_cell(QPainter&, FieldPosition);
+    void paint_point_cell(QPainter&, FieldPosition);
     std::size_t x2col(std::size_t x) { return is_point_mode() ? 1 : x / get_scale_factor() / kCellSize; }
     std::size_t y2row(std::size_t y) { return is_point_mode() ? 1 : y / get_scale_factor() / kCellSize; }
     std::size_t row2y(std::size_t row) { return is_point_mode() ? 1 : get_scale_factor() * row * kCellSize; }

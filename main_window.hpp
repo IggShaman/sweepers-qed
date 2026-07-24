@@ -24,9 +24,9 @@ private slots:
     void configure_field();
     void show_mines_toggled(bool);
     void run_solver(bool);
-    void cell_changed(landmine::Location);
+    void cell_changed(landmine::FieldPosition);
     void game_lost();
-    void solver_result_slot(landmine::Solver::FeedbackState, landmine::Location center,
+    void solver_result_slot(landmine::Solver::FeedbackState, landmine::FieldPosition center,
                             size_t range);
 
 private:

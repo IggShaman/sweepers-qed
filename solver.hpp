@@ -2,9 +2,10 @@
 
 #include "board.hpp"
 
-#include <thread>
-#include <deque>
 #include <condition_variable>
+#include <deque>
+#include <functional>
+#include <thread>
 
 namespace landmine {
 
@@ -24,9 +25,9 @@ public:
 	kSuspended,
 	kGameLost
     };
-    
-    using ResultHandler = std::function<void(FeedbackState,Location,size_t)>;
-    
+
+    using ResultHandler = std::function<void(FeedbackState, FieldPosition, size_t)>;
+
     explicit Solver(GameBoardPtr board) : board_{board} {}
     virtual ~Solver();
     
@@ -35,19 +36,19 @@ public:
     void suspend();
     void resume();
     void stop();
-    void addPoi(Location);
+    void addPoi(FieldPosition);
     void setResultHandler(ResultHandler h) { resultHandler_ = h; }
     
 protected:
-    virtual bool doPoi(landmine::Location) = 0;
+    virtual bool doPoi(landmine::FieldPosition) = 0;
 
     struct NeighborhoodInfo {
         uint8_t mines_nr{}; // number of mines left around current cell
-        uint8_t nr{};       // size of "coveredUnmarkedLocations" array
-        std::array<Location, 8> coveredUnmarkedLocations;
+        uint8_t nr{};       // size of "coveredUnmarkedFieldPositions" array
+        std::array<FieldPosition, 8> coveredUnmarkedFieldPositions;
     };
-    NeighborhoodInfo getNeighborhoodInfo(Location) const;
-    
+    NeighborhoodInfo getNeighborhoodInfo(FieldPosition) const;
+
     GameBoardPtr board_;
     ResultHandler resultHandler_;
     
@@ -58,8 +59,8 @@ private:
     std::atomic<RunState> state_{RunState::kNew};
 
     std::mutex queue_mtx_;     // used to protect queue access
-    std::deque<Location> poi_; // a list of cells of interest
-    
+    std::deque<FieldPosition> poi_; // a list of cells of interest
+
     std::thread thread_;
     std::mutex mtx_;
     std::condition_variable cond_;

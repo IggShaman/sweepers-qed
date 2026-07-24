@@ -1,11 +1,11 @@
-* basic updates [/]
-- [ ] port to Qt6
-- [ ] rename to landmine
-- [ ] update GLPK to latest
+* basic updates [3/4]
+- [X] port to Qt6
+- [X] rename to landmine
+- [X] update GLPK to latest
 - [ ] fix mt issues
 
+* add solver: OR-Tools (CP)
 * add solver: HiGHS (https://highs.dev)
 * add solver: SCIP (https://scipopt.org)
-* add solver: OR-Tools (CP)
 * provide landmine probabilities
 * explore vulkan for rendering

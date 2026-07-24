@@ -68,7 +68,7 @@ void GameBoardWidget::paintEvent(QPaintEvent* ev) {
     }
 }
 
-void GameBoardWidget::paint_cell(QPainter& painter, Location l) {
+void GameBoardWidget::paint_cell(QPainter& painter, FieldPosition l) {
     painter.save();
 
     painter.translate(col2x(l.col), row2y(l.row));
@@ -141,7 +141,7 @@ void GameBoardWidget::paint_cell(QPainter& painter, Location l) {
     painter.restore();
 }
 
-void GameBoardWidget::paint_point_cell(QPainter& painter, Location l) {
+void GameBoardWidget::paint_point_cell(QPainter& painter, FieldPosition l) {
     auto ci = board_->at(l);
     switch (ci) {
     case GameBoard::CellInfo::Exploded:
@@ -184,7 +184,7 @@ void GameBoardWidget::mouseReleaseEvent(QMouseEvent* ev) {
 
     const auto pos = ev->position().toPoint();
 
-    Location l;
+    FieldPosition l;
     if (is_point_mode()) {
         l = {(size_t)std::max(0, pos.y()), (size_t)std::max(0, pos.x())};
     } else {
@@ -238,7 +238,7 @@ void GameBoardWidget::mouseReleaseEvent(QMouseEvent* ev) {
     };
 }
 
-void GameBoardWidget::update_cell(Location l) {
+void GameBoardWidget::update_cell(FieldPosition l) {
     if (is_point_mode()) {
         update(l.col, l.row, 1, 1);
 
@@ -247,7 +247,7 @@ void GameBoardWidget::update_cell(Location l) {
     }
 }
 
-void GameBoardWidget::update_box(Location center, size_t range) {
+void GameBoardWidget::update_box(FieldPosition center, size_t range) {
     if (is_point_mode()) {
         update(subtract_floor_0(center.col, range), subtract_floor_0(center.row, range),
                1 + range * 2, 1 + range * 2);

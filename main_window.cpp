@@ -81,7 +81,7 @@ void MainWindow::setup_solver() {
 
     solver_.reset(new GlpkSolver{board});
 
-    solver_->setResultHandler([this](auto ft, landmine::Location l, size_t range) {
+    solver_->setResultHandler([this](auto ft, landmine::FieldPosition l, size_t range) {
         // QThread::usleep(0); // slow down a bit for nice animation effect
         QMetaObject::invokeMethod(
             this, [this, ft, l, range] { solver_result_slot(ft, l, range); }, Qt::QueuedConnection);
@@ -147,7 +147,7 @@ void MainWindow::action_about() {
         "under certain conditions. Look here for GPL3 license: http://www.gnu.org/licenses/");
 }
 
-void MainWindow::cell_changed(landmine::Location l) {
+void MainWindow::cell_changed(landmine::FieldPosition l) {
     solver_->addPoi(l);
     update_cell_info();
 }
@@ -165,7 +165,7 @@ void MainWindow::game_lost() {
     show_mines_action_->setChecked(true);
 }
 
-void MainWindow::solver_result_slot(Solver::FeedbackState feedback_state, landmine::Location l,
+void MainWindow::solver_result_slot(Solver::FeedbackState feedback_state, landmine::FieldPosition l,
                                     size_t range) {
     switch (feedback_state) {
     case Solver::FeedbackState::kSolved:

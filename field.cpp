@@ -10,11 +10,11 @@ void Field::reset(size_t rows, size_t cols) {
     std::fill(data_.begin(), data_.end(), false);
 }
 
-size_t Field::to_index(Location l) const {
+size_t Field::to_index(FieldPosition l) const {
     return l.row * cols_ + l.col;
 }
 
-void Field::mark_mined(Location l, bool v) {
+void Field::mark_mined(FieldPosition l, bool v) {
     auto idx = to_index(l);
     if (data_[idx]) {
         if (!v) {
@@ -41,7 +41,7 @@ void Field::gen_random(size_t rows, size_t cols, size_t mines_nr) {
     // For low fill rates (<= 30%), this should work well.
     mines_nr_ = mines_nr;
     while (mines_nr) {
-        Location l{size_t(drand48() * rows_), size_t(drand48() * cols_)};
+        FieldPosition l{size_t(drand48() * rows_), size_t(drand48() * cols_)};
         if (is_mined(l))
             continue;
 
@@ -50,7 +50,7 @@ void Field::gen_random(size_t rows, size_t cols, size_t mines_nr) {
     }
 }
 
-uint8_t Field::nearby_mines_nr(Location l) const {
+uint8_t Field::nearby_mines_nr(FieldPosition l) const {
     uint8_t nr{};
 
     if (l.row > 0) {

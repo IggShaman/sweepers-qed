@@ -12,7 +12,7 @@ struct lp_row_info {
     std::string name;
 };
 
-bool GlpkSolver::doPoi(landmine::Location poi) {
+bool GlpkSolver::doPoi(landmine::FieldPosition poi) {
     if (board_->is_uncovered(poi)) {
         auto pois = getNeighborhoodInfo(poi);
         if (!pois.nr)
@@ -39,7 +39,7 @@ bool GlpkSolver::doPoi(landmine::Location poi) {
                 xlog << "ERROR: game is lost at " << v.first << ": shold've been empty, has a mine"
                      << "\nobj=" << obj << "\npoi=" << poi << "\nLP: " << lp->dump() << "\n";
                 board_->dump_region(poi, 3);
-                resultHandler_(FeedbackState::kGameLost, Location{}, 0);
+                resultHandler_(FeedbackState::kGameLost, FieldPosition{}, 0);
                 return false;
             }
 
@@ -71,7 +71,7 @@ bool GlpkSolver::doPoi(landmine::Location poi) {
     return true;
 }
 
-void GlpkSolver::prepare(lp::problem* lp, Location poi, VariablesMapType& vars) {
+void GlpkSolver::prepare(lp::problem* lp, FieldPosition poi, VariablesMapType& vars) {
     std::ostringstream oss;
 
     int vars_nr{};
@@ -88,7 +88,7 @@ void GlpkSolver::prepare(lp::problem* lp, Location poi, VariablesMapType& vars) 
         for (size_t col = poi.col > kRange ? poi.col - kRange : 0;
              col <= std::min(board_->cols() - 1, poi.col + kRange); ++col) {
 
-            Location l{row, col};
+            FieldPosition l{row, col};
             auto ci = board_->at(l);
             if (static_cast<int>(ci) < 0)
                 continue;
@@ -103,7 +103,7 @@ void GlpkSolver::prepare(lp::problem* lp, Location poi, VariablesMapType& vars) 
 
             for (uint8_t i = 0; i < pois.nr; ++i) {
                 // find/add column variable for an uncovered cell
-                auto iv = vars.insert({pois.coveredUnmarkedLocations[i], vars_nr + 1});
+                auto iv = vars.insert({pois.coveredUnmarkedFieldPositions[i], vars_nr + 1});
                 if (iv.second)
                     ++vars_nr;
 

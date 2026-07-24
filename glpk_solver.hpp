@@ -14,10 +14,10 @@ public:
     
 private:
     // maps location to variable id in an LP
-    using VariablesMapType = std::unordered_map<Location, int>;
+    using VariablesMapType = std::unordered_map<FieldPosition, int>;
 
-    void prepare(lp::problem*, landmine::Location, VariablesMapType&);
-    bool doPoi(landmine::Location) override;
+    void prepare(lp::problem*, landmine::FieldPosition, VariablesMapType&);
+    bool doPoi(landmine::FieldPosition) override;
 };
 
 } // namespace landmine

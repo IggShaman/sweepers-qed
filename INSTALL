@@ -1,3 +1,0 @@
-Needs Qt5, developed with Qt 5.4.1.
-
-Use ccmake or cmake-gui to create a build folder.

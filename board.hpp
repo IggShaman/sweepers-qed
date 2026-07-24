@@ -24,26 +24,26 @@ public:
     };
     
     void set_field(FieldPtr);
-    CellInfo at(Location l) const { return data_[to_index(l)]; }
-    void mark_mine(Location, bool);
-    void mark_exploded(Location l) { edit_at(l) = CellInfo::Exploded; }
-    void uncovered_safe(Location, uint8_t);
+    CellInfo at(FieldPosition l) const { return data_[to_index(l)]; }
+    void mark_mine(FieldPosition, bool);
+    void mark_exploded(FieldPosition l) { edit_at(l) = CellInfo::Exploded; }
+    void uncovered_safe(FieldPosition, uint8_t);
     size_t rows() const { return field_->rows(); }
     size_t cols() const { return field_->cols(); }
     size_t mines_marked() const { return mines_marked_; }
     FieldCPtr field() const { return field_; }
-    CellNeighborhoodIterator neighborhood(Location);
-    bool is_uncovered(Location l) const { return static_cast<int>(at(l)) >= 0; }
+    CellNeighborhoodIterator neighborhood(FieldPosition);
+    bool is_uncovered(FieldPosition l) const { return static_cast<int>(at(l)) >= 0; }
     bool game_lost() const { return game_lost_; }
     void set_game_lost() { game_lost_ = true; }
     size_t uncovered_nr() const { return uncovered_nr_; }
     size_t left_nr() const { return data_.size() - uncovered_nr_ - mines_marked_; }
-    void dump_region(Location, size_t range) const;
-    
+    void dump_region(FieldPosition, size_t range) const;
+
 private:
-    size_t to_index(const Location& l) const { return field_->cols() * l.row + l.col; }
-    CellInfo& edit_at(Location l) { return data_[to_index(l)]; }
-    
+    size_t to_index(const FieldPosition& l) const { return field_->cols() * l.row + l.col; }
+    CellInfo& edit_at(FieldPosition l) { return data_[to_index(l)]; }
+
     FieldPtr field_;
     std::vector<CellInfo> data_;
     size_t mines_marked_{};
@@ -55,21 +55,20 @@ using GameBoardPtr = std::shared_ptr<GameBoard>;
 
 class CellNeighborhoodIterator {
 public:
-    CellNeighborhoodIterator(GameBoard*, Location);
-    
+    CellNeighborhoodIterator(GameBoard*, FieldPosition);
+
     CellNeighborhoodIterator& operator++() { ++i_; return *this; }
     operator bool() const { return i_ < end_; }
     GameBoard::CellInfo at() { return board_->at(neighbors_[i_]); }
-    const Location& operator*() const { return neighbors_[i_]; }
-    
+    const FieldPosition& operator*() const { return neighbors_[i_]; }
+
 private:
     uint8_t i_{}, end_{};
-    std::array<Location, 8> neighbors_;
+    std::array<FieldPosition, 8> neighbors_;
     GameBoard* board_{};
 };
 
-inline CellNeighborhoodIterator
-GameBoard::neighborhood(Location l) {
+inline CellNeighborhoodIterator GameBoard::neighborhood(FieldPosition l) {
     return CellNeighborhoodIterator(this, l);
 }
 
