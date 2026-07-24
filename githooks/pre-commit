@@ -1,0 +1,5 @@
+#!/bin/sh
+# pre-commit: reject if staged *changes* need reformatting
+git clang-format --staged --diff --quiet && exit 0
+echo >&2 "Staged changes need formatting. Run: git clang-format --staged  (then re-stage)"
+exit 1

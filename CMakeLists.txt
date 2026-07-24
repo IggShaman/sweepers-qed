@@ -15,14 +15,14 @@ SET(CMAKE_AUTORCC ON)
 
 qt_add_executable(
   landmine
-  solver.cc
-  field.cc
-  board.cc
-  game_board_widget.cc
-  main_window.cc
+  solver.cpp
+  field.cpp
+  board.cpp
+  game_board_widget.cpp
+  main_window.cpp
   main.cpp
-  glpk_solver.cc
-  glpk_lp_problem.cc
+  glpk_solver.cpp
+  glpk_lp_problem.cpp
   landmine.qrc
 )
 
