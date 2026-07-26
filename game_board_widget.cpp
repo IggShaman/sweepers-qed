@@ -4,25 +4,42 @@
 #include <QPaintEvent>
 #include <QPainter>
 
-namespace landmine {
+namespace sweeper
+{
 
 size_t subtract_floor_0(size_t a, size_t b) {
     return a > b ? a - b : 0;
 }
 
 GameBoardWidget::GameBoardWidget()
-    : board_{new landmine::GameBoard}, cell_border_{200, 200, 200}, cell_opened_bg_{220, 220, 220},
+    : board_{new qed::GameBoard}, cell_border_{200, 200, 200}, cell_opened_bg_{220, 220, 220},
       cell_unknown_bg_{100, 100, 100},
-      per_count_colors_text_{Qt::black,       Qt::darkBlue, Qt::darkGreen, Qt::darkCyan,
-                             Qt::darkMagenta, Qt::black,    Qt::black,     Qt::black},
-      per_count_colors_box_{Qt::black,   Qt::blue,   Qt::green,  Qt::cyan,
-                            Qt::magenta, Qt::yellow, Qt::yellow, Qt::yellow} {
+      per_count_colors_text_{
+        Qt::black,
+        Qt::darkBlue,
+        Qt::darkGreen,
+        Qt::darkCyan,
+        Qt::darkMagenta,
+        Qt::black,
+        Qt::black,
+        Qt::black},
+      per_count_colors_box_{
+        Qt::black,
+        Qt::blue,
+        Qt::green,
+        Qt::cyan,
+        Qt::magenta,
+        Qt::yellow,
+        Qt::yellow,
+        Qt::yellow}
+{
     cell_font_.setPixelSize(kCellSize - 4);
     cell_font_.setBold(true);
-    board_->set_field(std::make_shared<Field>());
+    board_->set_field(std::make_shared<qed::Field>());
 }
 
-void GameBoardWidget::set_board(GameBoardPtr b) {
+void GameBoardWidget::set_board(qed::GameBoardPtr b)
+{
     board_ = b;
     update_widget_size();
 }
@@ -68,7 +85,8 @@ void GameBoardWidget::paintEvent(QPaintEvent* ev) {
     }
 }
 
-void GameBoardWidget::paint_cell(QPainter& painter, FieldPosition l) {
+void GameBoardWidget::paint_cell(QPainter& painter, qed::FieldPosition l)
+{
     painter.save();
 
     painter.translate(col2x(l.col), row2y(l.row));
@@ -93,29 +111,29 @@ void GameBoardWidget::paint_cell(QPainter& painter, FieldPosition l) {
 
     auto ci = board_->at(l);
     switch (ci) {
-    case GameBoard::CellInfo::Exploded:
+    case qed::GameBoard::CellInfo::Exploded:
         painter.fillRect(r, QBrush(Qt::black));
         break;
 
-    case GameBoard::CellInfo::MarkedMine:
+    case qed::GameBoard::CellInfo::MarkedLandmine:
         painter.fillRect(r, QBrush(Qt::red));
         break;
 
-    case GameBoard::CellInfo::Unknown:
+    case qed::GameBoard::CellInfo::Unknown:
         painter.fillRect(r, cell_unknown_bg_);
         break;
 
-    case GameBoard::CellInfo::N0:
+    case qed::GameBoard::CellInfo::N0:
         break;
 
-    case GameBoard::CellInfo::N1:
-    case GameBoard::CellInfo::N2:
-    case GameBoard::CellInfo::N3:
-    case GameBoard::CellInfo::N4:
-    case GameBoard::CellInfo::N5:
-    case GameBoard::CellInfo::N6:
-    case GameBoard::CellInfo::N7:
-    case GameBoard::CellInfo::N8:
+    case qed::GameBoard::CellInfo::N1:
+    case qed::GameBoard::CellInfo::N2:
+    case qed::GameBoard::CellInfo::N3:
+    case qed::GameBoard::CellInfo::N4:
+    case qed::GameBoard::CellInfo::N5:
+    case qed::GameBoard::CellInfo::N6:
+    case qed::GameBoard::CellInfo::N7:
+    case qed::GameBoard::CellInfo::N8:
         if (scale_step_ >= kDrawTextScaleStep) {
             painter.fillRect(r, cell_opened_bg_);
             painter.setPen(per_count_colors_text_[static_cast<int>(ci)]);
@@ -141,36 +159,37 @@ void GameBoardWidget::paint_cell(QPainter& painter, FieldPosition l) {
     painter.restore();
 }
 
-void GameBoardWidget::paint_point_cell(QPainter& painter, FieldPosition l) {
+void GameBoardWidget::paint_point_cell(QPainter& painter, qed::FieldPosition l)
+{
     auto ci = board_->at(l);
     switch (ci) {
-    case GameBoard::CellInfo::Exploded:
+    case qed::GameBoard::CellInfo::Exploded:
         painter.setPen(Qt::black);
         break;
 
-    case GameBoard::CellInfo::MarkedMine:
+    case qed::GameBoard::CellInfo::MarkedLandmine:
         painter.setPen(Qt::red);
         break;
 
-    case GameBoard::CellInfo::Unknown:
+    case qed::GameBoard::CellInfo::Unknown:
         if (show_landmines_ and board_->field()->is_landmine(l))
             painter.setPen(Qt::darkRed);
         else
             painter.setPen(cell_unknown_bg_);
         break;
 
-    case GameBoard::CellInfo::N0:
+    case qed::GameBoard::CellInfo::N0:
         painter.setPen(cell_opened_bg_);
         break;
 
-    case GameBoard::CellInfo::N1:
-    case GameBoard::CellInfo::N2:
-    case GameBoard::CellInfo::N3:
-    case GameBoard::CellInfo::N4:
-    case GameBoard::CellInfo::N5:
-    case GameBoard::CellInfo::N6:
-    case GameBoard::CellInfo::N7:
-    case GameBoard::CellInfo::N8:
+    case qed::GameBoard::CellInfo::N1:
+    case qed::GameBoard::CellInfo::N2:
+    case qed::GameBoard::CellInfo::N3:
+    case qed::GameBoard::CellInfo::N4:
+    case qed::GameBoard::CellInfo::N5:
+    case qed::GameBoard::CellInfo::N6:
+    case qed::GameBoard::CellInfo::N7:
+    case qed::GameBoard::CellInfo::N8:
         painter.setPen(per_count_colors_box_[static_cast<int>(ci)]);
         break;
     };
@@ -184,7 +203,7 @@ void GameBoardWidget::mouseReleaseEvent(QMouseEvent* ev) {
 
     const auto pos = ev->position().toPoint();
 
-    FieldPosition l;
+    qed::FieldPosition l;
     if (is_point_mode()) {
         l = {(size_t)std::max(0, pos.y()), (size_t)std::max(0, pos.x())};
     } else {
@@ -194,8 +213,10 @@ void GameBoardWidget::mouseReleaseEvent(QMouseEvent* ev) {
     switch (ev->button()) {
     case Qt::LeftButton: {
         // NOTE: no modifiers pressed
-        if (board_->at(l) != GameBoard::CellInfo::Unknown)
+        if (board_->at(l) != qed::GameBoard::CellInfo::Unknown)
+        {
             return;
+        }
 
         ev->accept();
         if (board_->field()->is_landmine(l)) {
@@ -215,13 +236,13 @@ void GameBoardWidget::mouseReleaseEvent(QMouseEvent* ev) {
     case Qt::RightButton: {
         ev->accept();
         switch (board_->at(l)) {
-        case GameBoard::CellInfo::MarkedMine:
+        case qed::GameBoard::CellInfo::MarkedLandmine:
             board_->mark_mine(l, false);
             update_cell(l);
             emit cell_changed(l);
             break;
 
-        case GameBoard::CellInfo::Unknown:
+        case qed::GameBoard::CellInfo::Unknown:
             board_->mark_mine(l, true);
             update_cell(l);
             emit cell_changed(l);
@@ -238,7 +259,8 @@ void GameBoardWidget::mouseReleaseEvent(QMouseEvent* ev) {
     };
 }
 
-void GameBoardWidget::update_cell(FieldPosition l) {
+void GameBoardWidget::update_cell(qed::FieldPosition l)
+{
     if (is_point_mode()) {
         update(l.col, l.row, 1, 1);
 
@@ -247,15 +269,23 @@ void GameBoardWidget::update_cell(FieldPosition l) {
     }
 }
 
-void GameBoardWidget::update_box(FieldPosition center, size_t range) {
-    if (is_point_mode()) {
-        update(subtract_floor_0(center.col, range), subtract_floor_0(center.row, range),
-               1 + range * 2, 1 + range * 2);
-
-    } else {
-        update(col2x(subtract_floor_0(center.col, range)),
-               row2y(subtract_floor_0(center.row, range)), (1 + range * 2) * scaled_cell_size(),
-               (1 + range * 2) * scaled_cell_size());
+void GameBoardWidget::update_box(qed::FieldPosition center, size_t range)
+{
+    if (is_point_mode())
+    {
+        update(
+          subtract_floor_0(center.col, range),
+          subtract_floor_0(center.row, range),
+          1 + range * 2,
+          1 + range * 2);
+    }
+    else
+    {
+        update(
+          col2x(subtract_floor_0(center.col, range)),
+          row2y(subtract_floor_0(center.row, range)),
+          (1 + range * 2) * scaled_cell_size(),
+          (1 + range * 2) * scaled_cell_size());
     }
 }
 
@@ -288,4 +318,4 @@ size_t GameBoardWidget::scaled_cell_size() const {
     return is_point_mode() ? 1 : get_scale_factor() * kCellSize;
 }
 
-} // namespace landmine
+} // namespace sweeper

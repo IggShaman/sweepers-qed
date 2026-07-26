@@ -7,7 +7,8 @@
 #include <memory>
 #include <vector>
 
-namespace landmine {
+namespace qed
+{
 
 //
 // Represents a true landmine field.
@@ -38,4 +39,4 @@ private:
 using FieldPtr = std::shared_ptr<Field>;
 using FieldCPtr = std::shared_ptr<const Field>;
 
-} // namespace landmine
+} // namespace qed

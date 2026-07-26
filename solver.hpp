@@ -1,13 +1,15 @@
 #pragma once
 
 #include "board.hpp"
+#include "game_board_widget.hpp"
 
 #include <condition_variable>
 #include <deque>
 #include <functional>
 #include <thread>
 
-namespace landmine {
+namespace qed
+{
 
 class Solver {
     static constexpr const size_t kUpdateRange = 1;
@@ -40,7 +42,7 @@ public:
     void setResultHandler(ResultHandler h) { resultHandler_ = h; }
     
 protected:
-    virtual bool doPoi(landmine::FieldPosition) = 0;
+    virtual bool doPoi(FieldPosition) = 0;
 
     struct NeighborhoodInfo {
         uint8_t landmines_count{}; // number of landmines left around current cell
@@ -66,4 +68,4 @@ private:
     std::condition_variable cond_;
 };
 
-} // namespace landmine
+} // namespace qed

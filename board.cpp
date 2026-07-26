@@ -2,21 +2,25 @@
 
 #include <iostream>
 
-namespace landmine {
+namespace qed
+{
 
-void GameBoard::uncovered_safe(FieldPosition l, uint8_t v) {
+void GameBoard::uncovered_safe(qed::FieldPosition l, uint8_t v)
+{
     edit_at(l) = static_cast<CellInfo>(v);
     ++uncovered_count_;
 }
 
-void GameBoard::set_field(FieldPtr field) {
+void GameBoard::set_field(qed::FieldPtr field)
+{
     field_ = field;
     data_.resize(field_->rows() * field_->cols());
     std::fill(data_.begin(), data_.end(), CellInfo::Unknown);
 }
 
-CellNeighborhoodIterator::CellNeighborhoodIterator(GameBoard* board, FieldPosition l)
-    : board_{board} {
+CellNeighborhoodIterator::CellNeighborhoodIterator(GameBoard* board, qed::FieldPosition l)
+    : board_{board}
+{
 
     end_ = 0;
     if (l.row > 0) {
@@ -41,26 +45,30 @@ CellNeighborhoodIterator::CellNeighborhoodIterator(GameBoard* board, FieldPositi
     }
 }
 
-void GameBoard::mark_mine(FieldPosition l, bool v) {
+void GameBoard::mark_mine(qed::FieldPosition l, bool v)
+{
     auto& ci = edit_at(l);
 
     if (v) {
         if (ci != CellInfo::Unknown)
             return;
 
-        ci = CellInfo::MarkedMine;
+        ci = CellInfo::MarkedLandmine;
         ++landmines_marked_;
 
     } else {
-        if (ci != CellInfo::MarkedMine)
+        if (ci != CellInfo::MarkedLandmine)
+        {
             return;
+        }
 
         ci = CellInfo::Unknown;
         --landmines_marked_;
     }
 }
 
-void GameBoard::dump_region(FieldPosition poi, size_t range) const {
+void GameBoard::dump_region(qed::FieldPosition poi, size_t range) const
+{
     std::cout << "center=" << poi << "\n";
     size_t col0 = poi.col > range + 1 ? poi.col - range - 1 : 0;
     size_t col1 = std::min(cols() - 1, poi.col + range + 1);
@@ -70,7 +78,7 @@ void GameBoard::dump_region(FieldPosition poi, size_t range) const {
 
         std::cout << row << ": ";
         for (size_t col = col0; col <= col1; ++col) {
-            FieldPosition l{row, col};
+            qed::FieldPosition l{row, col};
             char ch{};
             auto v = at(l);
             switch (v) {
@@ -78,7 +86,7 @@ void GameBoard::dump_region(FieldPosition poi, size_t range) const {
                 ch = '!';
                 break;
 
-            case GameBoard::CellInfo::MarkedMine:
+            case GameBoard::CellInfo::MarkedLandmine:
                 if (field_->is_landmine(l))
                     ch = '*';
                 else
@@ -107,4 +115,4 @@ void GameBoard::dump_region(FieldPosition poi, size_t range) const {
     }
 }
 
-} // namespace landmine
+} // namespace qed

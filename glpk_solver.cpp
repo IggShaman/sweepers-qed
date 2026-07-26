@@ -3,7 +3,8 @@
 
 #include "logger.hpp"
 
-namespace landmine {
+namespace qed
+{
 
 struct lp_row_info {
     lp_row_info(uint8_t v, std::string n) : fixed_value{v}, name{n} {}
@@ -12,7 +13,8 @@ struct lp_row_info {
     std::string name;
 };
 
-bool GlpkSolver::doPoi(landmine::FieldPosition poi) {
+bool GlpkSolver::doPoi(qed::FieldPosition poi)
+{
     if (board_->is_uncovered(poi)) {
         auto pois = getNeighborhoodInfo(poi);
         if (!pois.nr)
@@ -146,4 +148,4 @@ void GlpkSolver::prepare(lp::problem* lp, FieldPosition poi, VariablesMapType& v
     }
 }
 
-} // namespace landmine
+} // namespace qed

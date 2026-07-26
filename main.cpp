@@ -22,7 +22,7 @@
 int main(int argc, char** argv) {
     QApplication q{argc, argv};
 
-    landmine::MainWindow mw;
+    sweeper::MainWindow mw;
     mw.show();
     
     return q.exec();

@@ -8,7 +8,8 @@
 
 namespace Ui { class MainWindow; }
 
-namespace landmine {
+namespace sweeper
+{
 
 class GameBoardWidget;
 
@@ -24,10 +25,9 @@ private slots:
     void configure_field();
     void show_landmines_toggled(bool);
     void run_solver(bool);
-    void cell_changed(landmine::FieldPosition);
+    void cell_changed(qed::FieldPosition);
     void game_lost();
-    void solver_result_slot(landmine::Solver::FeedbackState, landmine::FieldPosition center,
-                            size_t range);
+    void solver_result_slot(qed::Solver::FeedbackState, qed::FieldPosition center, size_t range);
 
 private:
     void update_cell_info();
@@ -35,8 +35,8 @@ private:
     
     std::unique_ptr<Ui::MainWindow> ui_;
     GameBoardWidget* game_board_widget_{};
-    std::unique_ptr<Solver> solver_{};
-    
+    std::unique_ptr<qed::Solver> solver_{};
+
     size_t new_rows_{3};
     size_t new_cols_{3};
     size_t new_landmines_{2};
@@ -46,4 +46,4 @@ private:
     QLabel* landmines_info_label_{};
 };
 
-} // namespace landmine
+} // namespace sweeper

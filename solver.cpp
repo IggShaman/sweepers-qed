@@ -3,7 +3,8 @@
 
 #include <thread>
 
-namespace landmine {
+namespace qed
+{
 
 Solver::~Solver() {
     stop();
@@ -81,7 +82,7 @@ Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition l) const {
     auto ci = board_->at(l);
     switch (ci) {
     case GameBoard::CellInfo::Exploded:
-    case GameBoard::CellInfo::MarkedMine:
+    case GameBoard::CellInfo::MarkedLandmine:
     case GameBoard::CellInfo::Unknown:
         I_FAIL("internal error: cell " << l << " is of type " << static_cast<int>(ci)
                                        << ": not a free open one");
@@ -104,7 +105,7 @@ Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition l) const {
         auto it = board_->neighborhood(l);
         while (it) {
             switch (it.at()) {
-            case GameBoard::CellInfo::MarkedMine:
+            case GameBoard::CellInfo::MarkedLandmine:
                 --rv.landmines_count;
                 break;
 
@@ -149,4 +150,4 @@ void Solver::asyncSolver() {
     }
 }
 
-} // namespace landmine
+} // namespace qed

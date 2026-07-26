@@ -2,7 +2,8 @@
 
 #include <ostream>
 
-namespace landmine {
+namespace qed
+{
 
 // Represents a coordinate on a field.
 struct FieldPosition {
@@ -25,17 +26,20 @@ inline size_t hash_mix(size_t x) { // splitmix64 finalizer
     return x ^ (x >> 31);
 }
 
-} // namespace landmine
+} // namespace qed
 
 namespace std {
 
-template <> struct hash<landmine::FieldPosition> {
-    std::size_t operator()(const landmine::FieldPosition& l) const {
-        return landmine::hash_mix(l.row * 0x9e3779b97f4a7c15ULL + l.col);
+template <> struct hash<qed::FieldPosition>
+{
+    std::size_t operator()(const qed::FieldPosition& l) const
+    {
+        return qed::hash_mix(l.row * 0x9e3779b97f4a7c15ULL + l.col);
     }
 };
 
-inline ostream& operator<<(ostream& os, const landmine::FieldPosition& l) {
+inline ostream& operator<<(ostream& os, const qed::FieldPosition& l)
+{
     os << '(' << l.row << ' ' << l.col << ')';
     return os;
 }

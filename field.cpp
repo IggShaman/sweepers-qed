@@ -1,6 +1,7 @@
 #include "field.hpp"
 
-namespace landmine {
+namespace qed
+{
 
 void Field::reset(size_t rows, size_t cols) {
     landmines_count_ = 0;
@@ -78,4 +79,4 @@ uint8_t Field::nearby_landmines_count(FieldPosition l) const {
     return nr;
 }
 
-} // namespace landmine
+} // namespace qed

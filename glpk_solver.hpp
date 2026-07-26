@@ -4,7 +4,8 @@
 
 namespace lp { class problem; }
 
-namespace landmine {
+namespace qed
+{
 
 class GlpkSolver : public Solver {
 public:
@@ -16,8 +17,8 @@ private:
     // maps location to variable id in an LP
     using VariablesMapType = std::unordered_map<FieldPosition, int>;
 
-    void prepare(lp::problem*, landmine::FieldPosition, VariablesMapType&);
-    bool doPoi(landmine::FieldPosition) override;
+    void prepare(lp::problem*, qed::FieldPosition, VariablesMapType&);
+    bool doPoi(qed::FieldPosition) override;
 };
 
-} // namespace landmine
+} // namespace qed

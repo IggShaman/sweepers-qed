@@ -1,6 +1,6 @@
 * basic updates [3/4]
 - [X] port to Qt6
-- [X] rename to landmine
+- [X] rename to sweepers-qed
 - [X] update GLPK to latest
 - [ ] fix mt issues
 

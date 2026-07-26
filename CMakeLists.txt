@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.2.0)
-project(LANDMINE CXX)
+project(SWEEPERS_QED CXX)
 
 SET(CMAKE_CXX_STANDARD 26)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,7 +14,7 @@ SET(CMAKE_AUTOUIC ON)
 SET(CMAKE_AUTORCC ON)
 
 qt_add_executable(
-  landmine
+  sweepers-qed
   solver.cpp
   field.cpp
   board.cpp
@@ -23,11 +23,11 @@ qt_add_executable(
   main.cpp
   glpk_solver.cpp
   glpk_lp_problem.cpp
-  landmine.qrc
+  sweeper.qrc
 )
 
 target_link_libraries(
-  landmine
+  sweepers-qed
   PRIVATE
   Qt6::Core
   Qt6::Widgets

@@ -9,11 +9,13 @@
 #include <QMessageBox>
 #include <QtGui/QAction>
 
-namespace landmine {
+namespace sweeper
+{
 
 MainWindow::~MainWindow() {}
 
-MainWindow::MainWindow() : ui_{new Ui::MainWindow} {
+MainWindow::MainWindow() : ui_{new Ui::MainWindow}
+{
     ui_->setupUi(this);
 
     ui_->scrollArea->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
@@ -25,7 +27,7 @@ MainWindow::MainWindow() : ui_{new Ui::MainWindow} {
 
     connect(ui_->action_About, &QAction::triggered, this, &MainWindow::action_about);
 
-    // QIcon(":/images/xxx.png")
+    // QIcon(":/images/<...>.png")
     auto* a = new QAction("&New", this);
     a->setShortcuts({Qt::CTRL | Qt::Key_N, Qt::Key_F2});
     a->setStatusTip("New field");
@@ -76,26 +78,31 @@ MainWindow::MainWindow() : ui_{new Ui::MainWindow} {
     gen_new();
 }
 
-void MainWindow::setup_solver() {
+void MainWindow::setup_solver()
+{
     auto board = game_board_widget_->board();
 
-    solver_.reset(new GlpkSolver{board});
+    solver_.reset(new qed::GlpkSolver{board});
 
-    solver_->setResultHandler([this](auto ft, landmine::FieldPosition l, size_t range) {
-        // QThread::usleep(0); // slow down a bit for nice animation effect
-        QMetaObject::invokeMethod(
-            this, [this, ft, l, range] { solver_result_slot(ft, l, range); }, Qt::QueuedConnection);
-    });
+    solver_->setResultHandler(
+      [this](auto ft, qed::FieldPosition position, size_t range)
+      {
+          // QThread::usleep(0); // slow down a bit for nice animation effect
+          QMetaObject::invokeMethod(
+            this,
+            [this, ft, position, range] { solver_result_slot(ft, position, range); },
+            Qt::QueuedConnection);
+      });
     solver_->startAsync();
 }
 
 void MainWindow::gen_new() {
     show_landmines_action_->setChecked(false);
 
-    auto field = std::make_shared<Field>();
+    auto field = std::make_shared<qed::Field>();
     field->gen_random(new_rows_, new_cols_, new_landmines_);
 
-    auto board = std::make_shared<GameBoard>();
+    auto board = std::make_shared<qed::GameBoard>();
     board->set_field(field);
     game_board_widget_->set_board(board);
     setup_solver();
@@ -139,50 +146,59 @@ void MainWindow::run_solver(bool v) {
 
 void MainWindow::action_about() {
     QMessageBox::about(
-        this, "Landmine",
-        "Landmine: a simple landmines game with solver.\n"
-        "Copyright (C) 2015-2018 Igor Shevchenko <igor.shevchenko@gmail.com>\n"
-        "This program comes with ABSOLUTELY NO WARRANTY.\n"
-        "This is free software, and you are welcome to redistribute it\n"
-        "under certain conditions. Look here for GPL3 license: http://www.gnu.org/licenses/");
+      this,
+      "Landmine",
+      "sweepers-qed: a simple landmines sweeper game with a solver.\n"
+      "Copyright (C) 2015-2018 Igor Shevchenko <igor.shevchenko@gmail.com>\n"
+      "This program comes with ABSOLUTELY NO WARRANTY.\n"
+      "This is free software, and you are welcome to redistribute it\n"
+      "under certain conditions. Look here for GPL3 license: http://www.gnu.org/licenses/");
 }
 
-void MainWindow::cell_changed(landmine::FieldPosition l) {
-    solver_->addPoi(l);
+void MainWindow::cell_changed(qed::FieldPosition position)
+{
+    solver_->addPoi(position);
     update_cell_info();
 }
 
-void MainWindow::update_cell_info() {
-    landmines_info_label_->setText(QString("Landmines: %1 / %2 Uncovered: %3 Left: %4")
-                                       .arg(game_board_widget_->board()->landmines_marked())
-                                       .arg(game_board_widget_->board()->field()->landmines_count())
-                                       .arg(game_board_widget_->board()->uncovered_count())
-                                       .arg(game_board_widget_->board()->left_count()));
+void MainWindow::update_cell_info()
+{
+    landmines_info_label_->setText( //
+      QString("Landmines: %1 / %2 Uncovered: %3 Left: %4")
+        .arg(game_board_widget_->board()->landmines_marked())
+        .arg(game_board_widget_->board()->field()->landmines_count())
+        .arg(game_board_widget_->board()->uncovered_count())
+        .arg(game_board_widget_->board()->left_count()));
 }
 
-void MainWindow::game_lost() {
+void MainWindow::game_lost()
+{
     game_board_widget_->board()->set_game_lost();
     show_landmines_action_->setChecked(true);
 }
 
-void MainWindow::solver_result_slot(Solver::FeedbackState feedback_state, landmine::FieldPosition l,
-                                    size_t range) {
-    switch (feedback_state) {
-    case Solver::FeedbackState::kSolved:
-        game_board_widget_->update_box(l, range);
+void MainWindow::solver_result_slot(
+  qed::Solver::FeedbackState feedback_state,
+  qed::FieldPosition position,
+  size_t range)
+{
+    switch (feedback_state)
+    {
+    case qed::Solver::FeedbackState::kSolved:
+        game_board_widget_->update_box(position, range);
         update_cell_info();
         break;
 
-    case Solver::FeedbackState::kSuspended:
+    case qed::Solver::FeedbackState::kSuspended:
         game_board_widget_->set_rw(true);
         run_solver_action_->setChecked(false);
         break;
 
-    case Solver::FeedbackState::kGameLost:
+    case qed::Solver::FeedbackState::kGameLost:
         run_solver_action_->setChecked(false);
         game_lost();
         break;
     };
 }
 
-} // namespace landmine
+} // namespace sweeper
