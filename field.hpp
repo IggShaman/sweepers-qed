@@ -15,13 +15,16 @@ namespace qed
 //
 class Field {
 public:
-    void gen_random(size_t rows, size_t cols, size_t landmines_count);
+    void generate_random(size_t rows, size_t cols, size_t landmines_count);
     void reset(size_t rows, size_t cols);
 
     // for manual field control; maintains landmines_count
     void mark_landmine(FieldPosition, bool);
 
-    bool is_landmine(FieldPosition l) const { return data_[l.row * cols_ + l.col]; }
+    bool is_landmine(FieldPosition position) const
+    {
+        return data_[position.row * cols_ + position.col];
+    }
     uint8_t nearby_landmines_count(FieldPosition) const;
     size_t rows() const { return rows_; }
     size_t cols() const { return cols_; }

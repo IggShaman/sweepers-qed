@@ -5,9 +5,9 @@
 namespace qed
 {
 
-void GameBoard::uncovered_safe(qed::FieldPosition l, uint8_t v)
+void GameBoard::uncovered_safe(qed::FieldPosition position, uint8_t nearby_landmines_count)
 {
-    edit_at(l) = static_cast<CellInfo>(v);
+    edit_at(position) = static_cast<CellInfo>(nearby_landmines_count);
     ++uncovered_count_;
 }
 
@@ -18,45 +18,68 @@ void GameBoard::set_field(qed::FieldPtr field)
     std::fill(data_.begin(), data_.end(), CellInfo::Unknown);
 }
 
-CellNeighborhoodIterator::CellNeighborhoodIterator(GameBoard* board, qed::FieldPosition l)
+CellNeighborhoodIterator::CellNeighborhoodIterator(GameBoard* board, qed::FieldPosition position)
     : board_{board}
 {
 
     end_ = 0;
-    if (l.row > 0) {
-        if (l.col > 0)
-            neighbors_[end_++] = {l.row - 1, l.col - 1};
-        neighbors_[end_++] = {l.row - 1, l.col};
-        if (l.col < board_->cols() - 1)
-            neighbors_[end_++] = {l.row - 1, l.col + 1};
+    if (position.row > 0)
+    {
+        if (position.col > 0)
+        {
+            neighbors_[end_++] = {position.row - 1, position.col - 1};
+        }
+
+        neighbors_[end_++] = {position.row - 1, position.col};
+
+        if (position.col < board_->cols() - 1)
+        {
+            neighbors_[end_++] = {position.row - 1, position.col + 1};
+        }
     }
 
-    if (l.col > 0)
-        neighbors_[end_++] = {l.row, l.col - 1};
-    if (l.col < board_->cols() - 1)
-        neighbors_[end_++] = {l.row, l.col + 1};
+    if (position.col > 0)
+    {
+        neighbors_[end_++] = {position.row, position.col - 1};
+    }
 
-    if (l.row < board_->rows() - 1) {
-        if (l.col > 0)
-            neighbors_[end_++] = {l.row + 1, l.col - 1};
-        neighbors_[end_++] = {l.row + 1, l.col};
-        if (l.col < board_->cols() - 1)
-            neighbors_[end_++] = {l.row + 1, l.col + 1};
+    if (position.col < board_->cols() - 1)
+    {
+        neighbors_[end_++] = {position.row, position.col + 1};
+    }
+
+    if (position.row < board_->rows() - 1)
+    {
+        if (position.col > 0)
+        {
+            neighbors_[end_++] = {position.row + 1, position.col - 1};
+        }
+
+        neighbors_[end_++] = {position.row + 1, position.col};
+
+        if (position.col < board_->cols() - 1)
+        {
+            neighbors_[end_++] = {position.row + 1, position.col + 1};
+        }
     }
 }
 
-void GameBoard::mark_mine(qed::FieldPosition l, bool v)
+void GameBoard::mark_mine(qed::FieldPosition position, bool value)
 {
-    auto& ci = edit_at(l);
+    auto& ci = edit_at(position);
 
-    if (v) {
+    if (value)
+    {
         if (ci != CellInfo::Unknown)
+        {
             return;
+        }
 
         ci = CellInfo::MarkedLandmine;
         ++landmines_marked_;
-
-    } else {
+    }
+    else
+    {
         if (ci != CellInfo::MarkedLandmine)
         {
             return;
@@ -78,17 +101,20 @@ void GameBoard::dump_region(qed::FieldPosition poi, size_t range) const
 
         std::cout << row << ": ";
         for (size_t col = col0; col <= col1; ++col) {
-            qed::FieldPosition l{row, col};
+            qed::FieldPosition position{row, col};
             char ch{};
-            auto v = at(l);
-            switch (v) {
+            auto cell_info = at(position);
+            switch (cell_info)
+            {
             case CellInfo::Exploded:
                 ch = '!';
                 break;
 
             case GameBoard::CellInfo::MarkedLandmine:
-                if (field_->is_landmine(l))
+                if (field_->is_landmine(position))
+                {
                     ch = '*';
+                }
                 else
                     ch = '%';
                 break;
@@ -106,7 +132,7 @@ void GameBoard::dump_region(qed::FieldPosition poi, size_t range) const
             case GameBoard::CellInfo::N6:
             case GameBoard::CellInfo::N7:
             case GameBoard::CellInfo::N8:
-                ch = '0' + static_cast<int>(v);
+                ch = '0' + static_cast<int>(cell_info);
                 break;
             };
             std::cout << ch;

@@ -31,7 +31,7 @@ MainWindow::MainWindow() : ui_{new Ui::MainWindow}
     auto* a = new QAction("&New", this);
     a->setShortcuts({Qt::CTRL | Qt::Key_N, Qt::Key_F2});
     a->setStatusTip("New field");
-    connect(a, &QAction::triggered, this, &MainWindow::gen_new);
+    connect(a, &QAction::triggered, this, &MainWindow::generate_new);
     ui_->toolBar->addAction(a);
 
     a = new QAction("&Configure", this);
@@ -75,7 +75,7 @@ MainWindow::MainWindow() : ui_{new Ui::MainWindow}
     landmines_info_label_ = new QLabel();
     statusBar()->addPermanentWidget(landmines_info_label_);
 
-    gen_new();
+    generate_new();
 }
 
 void MainWindow::setup_solver()
@@ -96,11 +96,12 @@ void MainWindow::setup_solver()
     solver_->startAsync();
 }
 
-void MainWindow::gen_new() {
+void MainWindow::generate_new()
+{
     show_landmines_action_->setChecked(false);
 
     auto field = std::make_shared<qed::Field>();
-    field->gen_random(new_rows_, new_cols_, new_landmines_);
+    field->generate_random(new_rows_, new_cols_, new_landmines_);
 
     auto board = std::make_shared<qed::GameBoard>();
     board->set_field(field);
@@ -110,7 +111,8 @@ void MainWindow::gen_new() {
     game_board_widget_->set_rw(true);
 }
 
-void MainWindow::configure_field() {
+void MainWindow::configure_field()
+{
     QDialog d;
     Ui::ConfigureFieldDialog ui;
     ui.setupUi(&d);
@@ -124,32 +126,39 @@ void MainWindow::configure_field() {
     new_rows_ = ui.rows_sb->value();
     new_cols_ = ui.cols_sb->value();
     new_landmines_ = ui.landmines_sb->value();
-    gen_new();
+    generate_new();
 }
 
-void MainWindow::show_landmines_toggled(bool v) {
-    game_board_widget_->set_show_landmines(v);
+void MainWindow::show_landmines_toggled(bool value)
+{
+    game_board_widget_->set_show_landmines(value);
 }
 
-void MainWindow::run_solver(bool v) {
-    if (game_board_widget_->board()->game_lost()) {
+void MainWindow::run_solver(bool value)
+{
+    if (game_board_widget_->board()->game_lost())
+    {
         return;
     }
 
-    if (v) {
+    if (value)
+    {
         game_board_widget_->set_rw(false);
         solver_->resume();
-    } else {
+    }
+    else
+    {
         solver_->suspend();
     }
 }
 
-void MainWindow::action_about() {
+void MainWindow::action_about()
+{
     QMessageBox::about(
       this,
-      "Landmine",
+      "sweepers-qed",
       "sweepers-qed: a simple landmines sweeper game with a solver.\n"
-      "Copyright (C) 2015-2018 Igor Shevchenko <igor.shevchenko@gmail.com>\n"
+      "Copyright (C) 12015-12026 Igor Shevchenko <igor.shevchenko@gmail.com>\n"
       "This program comes with ABSOLUTELY NO WARRANTY.\n"
       "This is free software, and you are welcome to redistribute it\n"
       "under certain conditions. Look here for GPL3 license: http://www.gnu.org/licenses/");

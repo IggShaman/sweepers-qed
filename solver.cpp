@@ -71,21 +71,25 @@ void Solver::stop() {
     cond_.notify_one();
 }
 
-void Solver::addPoi(FieldPosition l) {
+void Solver::addPoi(FieldPosition position)
+{
     std::lock_guard<std::mutex> lock{queue_mtx_};
-    poi_.push_back(l);
+    poi_.push_back(position);
 }
 
-Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition l) const {
+Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition position) const
+{
     NeighborhoodInfo rv;
 
-    auto ci = board_->at(l);
-    switch (ci) {
+    auto cell_info = board_->at(position);
+    switch (cell_info)
+    {
     case GameBoard::CellInfo::Exploded:
     case GameBoard::CellInfo::MarkedLandmine:
     case GameBoard::CellInfo::Unknown:
-        I_FAIL("internal error: cell " << l << " is of type " << static_cast<int>(ci)
-                                       << ": not a free open one");
+        I_FAIL(
+          "internal error: cell " << position << " is of type " << static_cast<int>(cell_info)
+                                  << ": not a free open one");
         break;
 
     case GameBoard::CellInfo::N0:
@@ -97,14 +101,15 @@ Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition l) const {
     case GameBoard::CellInfo::N6:
     case GameBoard::CellInfo::N7:
     case GameBoard::CellInfo::N8:
-        rv.landmines_count = static_cast<size_t>(ci);
+        rv.landmines_count = static_cast<size_t>(cell_info);
         break;
     };
 
     {
-        auto it = board_->neighborhood(l);
+        auto it = board_->neighborhood(position);
         while (it) {
-            switch (it.at()) {
+            switch (it.at())
+            {
             case GameBoard::CellInfo::MarkedLandmine:
                 --rv.landmines_count;
                 break;
@@ -124,13 +129,15 @@ Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition l) const {
     return rv;
 }
 
-void Solver::asyncSolver() {
+void Solver::asyncSolver()
+{
     while (okToRun()) {
         FieldPosition poi;
 
         {
             std::unique_lock<std::mutex> lock{queue_mtx_};
-            if (poi_.empty()) {
+            if (poi_.empty())
+            {
                 lock.unlock();
                 state_ = RunState::kSuspended;
                 resultHandler_(FeedbackState::kSuspended, FieldPosition{}, 0);
@@ -141,7 +148,8 @@ void Solver::asyncSolver() {
             poi_.pop_front();
         }
 
-        if (!doPoi(poi)) {
+        if (!doPoi(poi))
+        {
             state_ = RunState::kExit;
             return;
         }

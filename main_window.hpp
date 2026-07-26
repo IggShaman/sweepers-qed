@@ -21,7 +21,7 @@ public:
                  
 private slots:
     void action_about();
-    void gen_new();
+    void generate_new();
     void configure_field();
     void show_landmines_toggled(bool);
     void run_solver(bool);

@@ -90,17 +90,19 @@ void GlpkSolver::prepare(lp::problem* lp, FieldPosition poi, VariablesMapType& v
         for (size_t col = poi.col > kRange ? poi.col - kRange : 0;
              col <= std::min(board_->cols() - 1, poi.col + kRange); ++col) {
 
-            FieldPosition l{row, col};
-            auto ci = board_->at(l);
-            if (static_cast<int>(ci) < 0)
+            FieldPosition position{row, col};
+            auto cell_info = board_->at(position);
+            if (static_cast<int>(cell_info) < 0)
+            {
                 continue;
+            }
 
-            auto pois = getNeighborhoodInfo(l);
+            auto pois = getNeighborhoodInfo(position);
             if (!pois.nr)
                 continue;
 
             oss.str("");
-            oss << 'n' << l;
+            oss << 'n' << position;
             rows.push_back({pois.landmines_count, oss.str()});
 
             for (uint8_t i = 0; i < pois.nr; ++i) {

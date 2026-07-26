@@ -26,16 +26,19 @@ public:
     };
 
     void set_field(qed::FieldPtr);
-    CellInfo at(qed::FieldPosition l) const { return data_[to_index(l)]; }
+    CellInfo at(qed::FieldPosition position) const { return data_[to_index(position)]; }
     void mark_mine(qed::FieldPosition, bool);
-    void mark_exploded(qed::FieldPosition l) { edit_at(l) = CellInfo::Exploded; }
-    void uncovered_safe(qed::FieldPosition, uint8_t);
+    void mark_exploded(qed::FieldPosition position) { edit_at(position) = CellInfo::Exploded; }
+    void uncovered_safe(qed::FieldPosition, uint8_t nearby_landmines_count);
     size_t rows() const { return field_->rows(); }
     size_t cols() const { return field_->cols(); }
     size_t landmines_marked() const { return landmines_marked_; }
     qed::FieldCPtr field() const { return field_; }
     CellNeighborhoodIterator neighborhood(qed::FieldPosition);
-    bool is_uncovered(qed::FieldPosition l) const { return static_cast<int>(at(l)) >= 0; }
+    bool is_uncovered(qed::FieldPosition position) const
+    {
+        return static_cast<int>(at(position)) >= 0;
+    }
     bool game_lost() const { return game_lost_; }
     void set_game_lost() { game_lost_ = true; }
     size_t uncovered_count() const { return uncovered_count_; }
@@ -43,8 +46,11 @@ public:
     void dump_region(qed::FieldPosition, size_t range) const;
 
 private:
-    size_t to_index(const qed::FieldPosition& l) const { return field_->cols() * l.row + l.col; }
-    CellInfo& edit_at(qed::FieldPosition l) { return data_[to_index(l)]; }
+    size_t to_index(const qed::FieldPosition& position) const
+    {
+        return field_->cols() * position.row + position.col;
+    }
+    CellInfo& edit_at(qed::FieldPosition position) { return data_[to_index(position)]; }
 
     qed::FieldPtr field_;
     std::vector<CellInfo> data_;
@@ -71,9 +77,9 @@ private:
     GameBoard* board_{};
 };
 
-inline CellNeighborhoodIterator GameBoard::neighborhood(qed::FieldPosition l)
+inline CellNeighborhoodIterator GameBoard::neighborhood(qed::FieldPosition position)
 {
-    return CellNeighborhoodIterator(this, l);
+    return CellNeighborhoodIterator(this, position);
 }
 
 } // namespace qed
