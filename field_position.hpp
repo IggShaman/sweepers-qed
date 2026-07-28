@@ -1,47 +1,49 @@
 #pragma once
 
+#include <limits>
 #include <ostream>
 
 namespace qed
 {
-
-// Represents a coordinate on a field.
-struct FieldPosition {
-    FieldPosition() : row{}, col{} {}
-    FieldPosition(size_t _row, size_t _col) : row{_row}, col{_col} {}
-
-    size_t row{};
-    size_t col{};
-
-    bool operator==(const FieldPosition& other) const {
-        return row == other.row and col == other.col;
-    }
-};
-
-inline size_t hash_mix(size_t x) { // splitmix64 finalizer
-    x ^= x >> 30;
-    x *= 0xbf58476d1ce4e5b9ULL;
-    x ^= x >> 27;
-    x *= 0x94d049bb133111ebULL;
-    return x ^ (x >> 31);
-}
-
-} // namespace qed
-
-namespace std {
-
-template <> struct hash<qed::FieldPosition>
+template <typename T> struct field_position_type
 {
-    std::size_t operator()(const qed::FieldPosition& l) const
+    static constexpr T INVALID_INDEX = std::numeric_limits<T>::max();
+
+    field_position_type() = default;
+    field_position_type(T _row, T _column) : row{_row}, column{_column} {}
+
+    T row{INVALID_INDEX};
+    T column{INVALID_INDEX};
+
+    bool operator==(const field_position_type& other) const
     {
-        return qed::hash_mix(l.row * 0x9e3779b97f4a7c15ULL + l.col);
+        return row == other.row and column == other.column;
     }
+
+    operator bool() const { return row != INVALID_INDEX and column != INVALID_INDEX; }
+
+    bool operator!() const { return !*this; }
 };
 
-inline ostream& operator<<(ostream& os, const qed::FieldPosition& l)
+template <typename T>
+inline std::ostream& operator<<(std::ostream& os, const field_position_type<T>& position)
 {
-    os << '(' << l.row << ' ' << l.col << ')';
+    os << '(' << position.row << ' ' << position.column << ')';
     return os;
 }
 
+using index_type = int32_t;
+using FieldPosition = field_position_type<index_type>;
+
+} // namespace qed
+
+namespace std
+{
+template <> struct hash<qed::field_position_type<int32_t>>
+{
+    size_t operator()(const qed::field_position_type<int32_t>& position) const
+    {
+        return (static_cast<size_t>(position.row) << 32) + position.column;
+    }
+};
 } // namespace std

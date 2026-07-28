@@ -2,7 +2,7 @@ namespace lp {
 
 inline void matrix::add(int row, int col, double value) {
     rows_.push_back(row);
-    cols_.push_back(col);
+    columns_.push_back(col);
     values_.push_back(value);
 }
 

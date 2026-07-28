@@ -27,7 +27,8 @@ private slots:
     void run_solver(bool);
     void cell_changed(qed::FieldPosition);
     void game_lost();
-    void solver_result_slot(qed::Solver::FeedbackState, qed::FieldPosition center, size_t range);
+    void
+    handle_solver_result(qed::Solver::SolverState, qed::FieldPosition, const std::string& errmsg);
 
 private:
     void update_cell_info();
@@ -37,9 +38,9 @@ private:
     GameBoardWidget* game_board_widget_{};
     std::unique_ptr<qed::Solver> solver_{};
 
-    size_t new_rows_{3};
-    size_t new_cols_{3};
-    size_t new_landmines_{2};
+    qed::index_type new_rows_{3};
+    qed::index_type new_columns_{3};
+    qed::index_type new_landmines_{2};
 
     QAction* run_solver_action_{};
     QAction* show_landmines_action_{};

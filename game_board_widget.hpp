@@ -15,28 +15,25 @@ class GameBoardWidget : public QWidget {
     Q_OBJECT;
     
 public:
-    static constexpr std::size_t kCellSize = 20; // in pixels
+    static constexpr int kCellSize = 20; // in pixels
     static constexpr float kScaleStep = 0.05;
     static constexpr float kMaxScale = 10.0;
 
-    static constexpr std::size_t kPointModeScaleStep = 1;
-    static constexpr std::size_t kDrawBorderScaleStep = 0.5 / kScaleStep;
-    static constexpr std::size_t kDrawTextScaleStep = 0.2 / kScaleStep;
-    static constexpr std::size_t kMinScaleStep = 1;
-    static constexpr std::size_t kMaxScaleStep = kMaxScale / kScaleStep;
-    
+    static constexpr int kPointModeScaleStep = 1;
+    static constexpr int kDrawBorderScaleStep = 0.5 / kScaleStep;
+    static constexpr int kDrawTextScaleStep = 0.2 / kScaleStep;
+    static constexpr int kMinScaleStep = 1;
+    static constexpr int kMaxScaleStep = kMaxScale / kScaleStep;
+
     GameBoardWidget();
 
     qed::GameBoardPtr board() { return board_; }
     void set_board(qed::GameBoardPtr);
-    void set_show_landmines(bool v) {
-        show_landmines_ = v;
-        update();
-    }
+    void set_show_landmines(bool);
     void update_cell(qed::FieldPosition);
-    void update_box(qed::FieldPosition center, std::size_t range);
-    void set_scale_step(std::size_t step);
-    void set_rw(bool v) { rw_ = v; }
+    void update_box(qed::FieldPosition);
+    void set_scale_step(int step);
+    void set_rw(bool);
 
 public slots:
     void zoom_in();
@@ -57,12 +54,28 @@ protected:
 private:
     void paint_cell(QPainter&, qed::FieldPosition);
     void paint_point_cell(QPainter&, qed::FieldPosition);
-    std::size_t x2col(std::size_t x) { return is_point_mode() ? 1 : x / get_scale_factor() / kCellSize; }
-    std::size_t y2row(std::size_t y) { return is_point_mode() ? 1 : y / get_scale_factor() / kCellSize; }
-    std::size_t row2y(std::size_t row) { return is_point_mode() ? 1 : get_scale_factor() * row * kCellSize; }
-    std::size_t col2x(std::size_t col) { return is_point_mode() ? 1 : get_scale_factor() * col * kCellSize; }
+    qed::index_type x2column(size_t x)
+    {
+        return static_cast<qed::index_type>(
+          is_point_mode() ? x : x / get_scale_factor() / kCellSize);
+    }
+    qed::index_type y2row(size_t y)
+    {
+        return static_cast<qed::index_type>(
+          is_point_mode() ? y : y / get_scale_factor() / kCellSize);
+    }
+    size_t row2y(qed::index_type row)
+    {
+        return is_point_mode() ? static_cast<size_t>(row)
+                               : get_scale_factor() * static_cast<size_t>(row) * kCellSize;
+    }
+    size_t column2x(size_t column)
+    {
+        return is_point_mode() ? static_cast<size_t>(column)
+                               : get_scale_factor() * static_cast<size_t>(column) * kCellSize;
+    }
     float get_scale_factor() const { return scale_step_ * kScaleStep; }
-    std::size_t scaled_cell_size() const;
+    int scaled_cell_size() const;
     void update_widget_size();
 
     qed::GameBoardPtr board_;
@@ -73,8 +86,8 @@ private:
     QColor cell_opened_bg_;
     QColor cell_unknown_bg_;
     QFont cell_font_;
-    QColor per_count_colors_text_[8];
-    QColor per_count_colors_box_[8];
+    QColor per_count_colors_text_[9];
+    QColor per_count_colors_box_[9];
     std::size_t scale_step_ = 20;
     std::size_t prev_scale_step_ = 20; // go back to this when toggling scale mode
 };

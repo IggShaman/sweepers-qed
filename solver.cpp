@@ -6,80 +6,77 @@
 namespace qed
 {
 
-Solver::~Solver() {
+Solver::~Solver()
+{
     stop();
 
-    if (thread_.joinable()) {
+    if (thread_.joinable())
+    {
         thread_.join();
     }
 }
 
-void Solver::startAsync() {
-    I_ASSERT(state_ == RunState::kNew,
-             EX_LOG("state==" << static_cast<int>(state_.load()) << " != kNew"));
+void Solver::startAsync()
+{
+    I_ASSERT(
+      state_ == RunState::kNew,
+      EX_LOG("state==" << static_cast<int>(state_.load()) << " != kNew"));
 
     I_ASSERT(!thread_.joinable(), EX_LOG("thread is joinable"));
 
     state_ = RunState::kSuspended;
-    thread_ = std::thread(&Solver::asyncSolver, this);
+    thread_ = std::thread(&Solver::async_solver_runner, this);
 }
 
-bool Solver::isRunning() const {
-    return RunState::kRunning == state_ or RunState::kSuspending == state_;
+bool Solver::ok_to_run()
+{
+    std::unique_lock lock{runner_mutex_};
+
+    cond_.wait(
+      lock,
+      [this] { return state_ != RunState::kSuspended and state_ != RunState::kNew; });
+
+    return state_ == RunState::kRunning;
 }
 
-bool Solver::okToRun() {
-    while (true) {
-        switch (state_) {
-        case RunState::kNew:
-        case RunState::kSuspended: {
-            std::unique_lock<std::mutex> lck{mtx_};
-            cond_.wait(lck);
-            break;
-        }
-
-        case RunState::kSuspending:
-            state_ = RunState::kSuspended;
-            break;
-
-        case RunState::kRunning:
-            return true;
-
-        case RunState::kExit:
-            return false;
-        };
+void Solver::suspend()
+{
+    I_ASSERT(state_ != RunState::kExit, EX_LOG("state == kExit"));
+    {
+        std::lock_guard<std::mutex> lock(runner_mutex_);
+        state_ = RunState::kSuspended;
     }
-}
-
-void Solver::suspend() {
-    I_ASSERT(state_ != RunState::kExit, EX_LOG("state == kExit"));
-    std::lock_guard<std::mutex> lck(mtx_);
-    state_ = RunState::kSuspending;
     cond_.notify_one();
 }
 
-void Solver::resume() {
+void Solver::resume()
+{
     I_ASSERT(state_ != RunState::kExit, EX_LOG("state == kExit"));
-    std::lock_guard<std::mutex> lck(mtx_);
-    state_ = RunState::kRunning;
+    {
+        std::lock_guard<std::mutex> lock(runner_mutex_);
+        state_ = RunState::kRunning;
+    }
     cond_.notify_one();
 }
 
-void Solver::stop() {
-    std::lock_guard<std::mutex> lck(mtx_);
-    state_ = RunState::kExit;
+void Solver::stop()
+{
+    {
+        std::lock_guard<std::mutex> lock(runner_mutex_);
+        state_ = RunState::kExit;
+    }
     cond_.notify_one();
 }
 
 void Solver::addPoi(FieldPosition position)
 {
-    std::lock_guard<std::mutex> lock{queue_mtx_};
+    std::lock_guard<std::mutex> lock{queue_mutex_};
     poi_.push_back(position);
 }
 
 Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition position) const
 {
-    NeighborhoodInfo rv;
+    NeighborhoodInfo neighborhood;
 
     auto cell_info = board_->at(position);
     switch (cell_info)
@@ -101,21 +98,26 @@ Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition position) con
     case GameBoard::CellInfo::N6:
     case GameBoard::CellInfo::N7:
     case GameBoard::CellInfo::N8:
-        rv.landmines_count = static_cast<size_t>(cell_info);
+        neighborhood.landmines_count = static_cast<index_type>(cell_info);
         break;
     };
 
     {
         auto it = board_->neighborhood(position);
-        while (it) {
+        while (it)
+        {
             switch (it.at())
             {
             case GameBoard::CellInfo::MarkedLandmine:
-                --rv.landmines_count;
+                if (neighborhood.landmines_count > 0)
+                {
+                    --neighborhood.landmines_count;
+                }
                 break;
 
             case GameBoard::CellInfo::Unknown:
-                rv.coveredUnmarkedFieldPositions[rv.nr++] = *it;
+                neighborhood.covered_unmarked_field_positions
+                  [neighborhood.covered_unmarked_field_positions_count++] = *it;
                 break;
 
             default:
@@ -126,21 +128,22 @@ Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition position) con
         }
     }
 
-    return rv;
+    return neighborhood;
 }
 
-void Solver::asyncSolver()
+void Solver::async_solver_runner()
 {
-    while (okToRun()) {
+    while (ok_to_run())
+    {
         FieldPosition poi;
 
         {
-            std::unique_lock<std::mutex> lock{queue_mtx_};
+            std::unique_lock<std::mutex> lock{queue_mutex_};
             if (poi_.empty())
             {
-                lock.unlock();
                 state_ = RunState::kSuspended;
-                resultHandler_(FeedbackState::kSuspended, FieldPosition{}, 0);
+                lock.unlock();
+                result_handler_(SolverState::kSuspended, {}, {});
                 continue;
             }
 
@@ -150,12 +153,12 @@ void Solver::asyncSolver()
 
         if (!doPoi(poi))
         {
+            std::unique_lock<std::mutex> lock{queue_mutex_};
             state_ = RunState::kExit;
             return;
         }
 
-        resultHandler_(FeedbackState::kSolved, poi, kUpdateRange);
+        result_handler_(SolverState::kSolved, poi, {});
     }
 }
-
 } // namespace qed

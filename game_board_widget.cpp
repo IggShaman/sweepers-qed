@@ -4,26 +4,25 @@
 #include <QPaintEvent>
 #include <QPainter>
 
+#include <algorithm>
+
 namespace sweeper
 {
-
-size_t subtract_floor_0(size_t a, size_t b) {
-    return a > b ? a - b : 0;
-}
-
 GameBoardWidget::GameBoardWidget()
     : board_{new qed::GameBoard}, cell_border_{200, 200, 200}, cell_opened_bg_{220, 220, 220},
       cell_unknown_bg_{100, 100, 100},
       per_count_colors_text_{
-        Qt::black,
+        cell_opened_bg_,
         Qt::darkBlue,
         Qt::darkGreen,
         Qt::darkCyan,
         Qt::darkMagenta,
         Qt::black,
         Qt::black,
+        Qt::black,
         Qt::black},
       per_count_colors_box_{
+        cell_opened_bg_,
         Qt::black,
         Qt::blue,
         Qt::green,
@@ -44,41 +43,58 @@ void GameBoardWidget::set_board(qed::GameBoardPtr b)
     update_widget_size();
 }
 
-void GameBoardWidget::update_widget_size() {
-    setFixedSize(board_->cols() * scaled_cell_size(), board_->rows() * scaled_cell_size());
+void GameBoardWidget::update_widget_size()
+{
+    setFixedSize( //
+      board_->columns() * scaled_cell_size(),
+      board_->rows() * scaled_cell_size());
     update();
 }
 
-void GameBoardWidget::set_scale_step(size_t s) {
-    if (s < kMinScaleStep) {
-        s = kMinScaleStep;
-    } else if (s > kMaxScaleStep) {
-        s = kMaxScaleStep;
+void GameBoardWidget::set_scale_step(int scale_step)
+{
+    scale_step = std::clamp(scale_step, kMinScaleStep, kMaxScaleStep);
+    if (scale_step_ == scale_step)
+    {
+        return;
     }
 
-    if (scale_step_ != s) {
-        prev_scale_step_ = scale_step_;
-        scale_step_ = s;
-        update_widget_size();
-    }
+    prev_scale_step_ = scale_step_;
+    scale_step_ = scale_step;
+    update_widget_size();
 }
 
-void GameBoardWidget::paintEvent(QPaintEvent* ev) {
+void GameBoardWidget::paintEvent(QPaintEvent* event)
+{
     QPainter painter{this};
 
-    if (is_point_mode()) {
-        for (size_t row = (size_t)std::max(0, ev->rect().top());
-             row <= (size_t)std::max(0, ev->rect().bottom()); ++row) {
-            for (size_t col = (size_t)std::max(0, ev->rect().left());
-                 col <= (size_t)std::max(0, ev->rect().right()); ++col) {
+    if (is_point_mode())
+    {
+        for (qed::index_type row = static_cast<qed::index_type>(std::max(0, event->rect().top()));
+             row <= static_cast<qed::index_type>(std::max(0, event->rect().bottom()));
+             ++row)
+        {
+            for (qed::index_type col =
+                   static_cast<qed::index_type>(std::max(0, event->rect().left()));
+                 col <= static_cast<qed::index_type>(std::max(0, event->rect().right()));
+                 ++col)
+            {
                 paint_point_cell(painter, {row, col});
             }
         }
-    } else {
-        for (size_t row = y2row((size_t)std::max(0, ev->rect().top()));
-             row <= y2row((size_t)std::max(0, ev->rect().bottom())); ++row) {
-            for (size_t col = x2col((size_t)std::max(0, ev->rect().left()));
-                 col <= x2col((size_t)std::max(0, ev->rect().right())); ++col) {
+    }
+    else
+    {
+        for (qed::index_type row =
+               y2row(static_cast<qed::index_type>(std::max(0, event->rect().top())));
+             row <= y2row(static_cast<qed::index_type>(std::max(0, event->rect().bottom())));
+             ++row)
+        {
+            for (qed::index_type col =
+                   x2column(static_cast<qed::index_type>(std::max(0, event->rect().left())));
+                 col <= x2column(static_cast<qed::index_type>(std::max(0, event->rect().right())));
+                 ++col)
+            {
                 paint_cell(painter, {row, col});
             }
         }
@@ -89,7 +105,7 @@ void GameBoardWidget::paint_cell(QPainter& painter, qed::FieldPosition position)
 {
     painter.save();
 
-    painter.translate(col2x(position.col), row2y(position.row));
+    painter.translate(column2x(position.column), row2y(position.row));
     auto scale_factor = get_scale_factor();
     painter.scale(scale_factor, scale_factor);
 
@@ -129,8 +145,6 @@ void GameBoardWidget::paint_cell(QPainter& painter, qed::FieldPosition position)
         break;
 
     case qed::GameBoard::CellInfo::N0:
-        break;
-
     case qed::GameBoard::CellInfo::N1:
     case qed::GameBoard::CellInfo::N2:
     case qed::GameBoard::CellInfo::N3:
@@ -139,17 +153,24 @@ void GameBoardWidget::paint_cell(QPainter& painter, qed::FieldPosition position)
     case qed::GameBoard::CellInfo::N6:
     case qed::GameBoard::CellInfo::N7:
     case qed::GameBoard::CellInfo::N8:
+    {
+        bool is_zero = qed::GameBoard::CellInfo::N0 == cell_info;
+
         if (scale_step_ >= kDrawTextScaleStep)
         {
             painter.fillRect(r, cell_opened_bg_);
-            painter.setPen(per_count_colors_text_[static_cast<int>(cell_info)]);
-            painter.drawText(1, kCellSize - 1, QString::number(static_cast<int>(cell_info)));
+            if (!is_zero)
+            {
+                painter.setPen(per_count_colors_text_[static_cast<int>(cell_info)]);
+                painter.drawText(1, kCellSize - 1, QString::number(static_cast<int>(cell_info)));
+            }
         }
         else
         {
             painter.fillRect(r, per_count_colors_box_[static_cast<int>(cell_info)]);
         }
         break;
+    }
     };
 
     if (show_landmines_ and board_->field()->is_landmine(position))
@@ -157,9 +178,10 @@ void GameBoardWidget::paint_cell(QPainter& painter, qed::FieldPosition position)
         if (scale_step_ >= kDrawTextScaleStep)
         {
             painter.setPen(Qt::red);
-            for (size_t r = 1; r < 8; ++r)
+            for (qed::index_type r = 1; r < 8; ++r)
             {
-                for (size_t c = kCellSize - 8 + r; c < kCellSize; ++c)
+                // TODO??
+                for (qed::index_type c = kCellSize - 8 + r; c < kCellSize; ++c)
                 {
                     painter.drawPoint(c, r);
                 }
@@ -193,7 +215,9 @@ void GameBoardWidget::paint_point_cell(QPainter& painter, qed::FieldPosition pos
             painter.setPen(Qt::darkRed);
         }
         else
+        {
             painter.setPen(cell_unknown_bg_);
+        }
         break;
 
     case qed::GameBoard::CellInfo::N0:
@@ -212,71 +236,63 @@ void GameBoardWidget::paint_point_cell(QPainter& painter, qed::FieldPosition pos
         break;
     };
 
-    painter.drawPoint(position.col, position.row);
+    painter.drawPoint(position.column, position.row);
 }
 
-void GameBoardWidget::mouseReleaseEvent(QMouseEvent* ev) {
+void GameBoardWidget::mouseReleaseEvent(QMouseEvent* event)
+{
     if (!rw_ or board_->game_lost())
         return;
 
-    const auto pos = ev->position().toPoint();
+    const auto mouse_position = event->position().toPoint();
 
-    qed::FieldPosition position;
-    if (is_point_mode())
-    {
-        position = {
-          //
-          static_cast<size_t>(std::max(0, pos.y())),
-          static_cast<size_t>(std::max(0, pos.x()))};
-    }
-    else
-    {
-        position = {
-          //
-          y2row(static_cast<size_t>(std::max(0, pos.y()))),
-          x2col(static_cast<size_t>(std::max(0, pos.x())))};
-    }
+    qed::FieldPosition field_position{
+      static_cast<qed::index_type>(std::clamp(y2row(mouse_position.y()), 0, board_->rows() - 1)),
+      static_cast<qed::index_type>(
+        std::clamp(x2column(mouse_position.x()), 0, board_->columns() - 1))};
 
-    switch (ev->button())
+    switch (event->button())
     {
     case Qt::LeftButton: {
         // NOTE: no modifiers pressed
-        if (board_->at(position) != qed::GameBoard::CellInfo::Unknown)
+        if (board_->at(field_position) != qed::GameBoard::CellInfo::Unknown)
         {
             return;
         }
 
-        ev->accept();
-        if (board_->field()->is_landmine(position))
+        event->accept();
+        if (board_->field()->is_landmine(field_position))
         {
-            board_->mark_exploded(position);
-            emit cell_changed(position);
+            board_->mark_exploded(field_position);
+            emit cell_changed(field_position);
             emit game_lost();
         }
         else
         {
-            board_->uncovered_safe(position, board_->field()->nearby_landmines_count(position));
-            emit cell_changed(position);
+            board_->uncovered_safe(
+              field_position,
+              board_->field()->nearby_landmines_count(field_position));
+            emit cell_changed(field_position);
         }
 
-        update_cell(position);
+        update_cell(field_position);
         break;
     }
 
     case Qt::RightButton: {
-        ev->accept();
-        switch (board_->at(position))
+        event->accept();
+        switch (board_->at(field_position))
         {
         case qed::GameBoard::CellInfo::MarkedLandmine:
-            board_->mark_mine(position, false);
-            update_cell(position);
-            emit cell_changed(position);
+            board_->mark_mine(field_position, false);
+            update_cell(field_position);
+            emit cell_changed(field_position);
             break;
 
         case qed::GameBoard::CellInfo::Unknown:
-            board_->mark_mine(position, true);
-            update_cell(position);
-            emit cell_changed(position);
+            board_->mark_mine(field_position, true);
+            update_cell(field_position);
+            emit cell_changed(field_position);
             break;
 
         default:
@@ -294,43 +310,31 @@ void GameBoardWidget::update_cell(qed::FieldPosition position)
 {
     if (is_point_mode())
     {
-        update(position.col, position.row, 1, 1);
+        update(position.column, position.row, 1, 1);
     }
     else
     {
         update( //
-          col2x(position.col),
+          column2x(position.column),
           row2y(position.row),
           scaled_cell_size(),
           scaled_cell_size());
     }
 }
 
-void GameBoardWidget::update_box(qed::FieldPosition center, size_t range)
+void GameBoardWidget::update_box(qed::FieldPosition center)
 {
-    if (is_point_mode())
-    {
-        update(
-          subtract_floor_0(center.col, range),
-          subtract_floor_0(center.row, range),
-          1 + range * 2,
-          1 + range * 2);
-    }
-    else
-    {
-        update(
-          col2x(subtract_floor_0(center.col, range)),
-          row2y(subtract_floor_0(center.row, range)),
-          (1 + range * 2) * scaled_cell_size(),
-          (1 + range * 2) * scaled_cell_size());
-    }
+    auto size = is_point_mode() ? 1 : scaled_cell_size();
+    update(center.column, center.row, size, size);
 }
 
-void GameBoardWidget::wheelEvent(QWheelEvent* ev) {
-    if (ev->modifiers() & Qt::ControlModifier) {
-        ev->accept();
+void GameBoardWidget::wheelEvent(QWheelEvent* event)
+{
+    if (event->modifiers() & Qt::ControlModifier)
+    {
+        event->accept();
 
-        auto steps = ev->angleDelta() / 8 / 15;
+        auto steps = event->angleDelta() / 8 / 15;
         if (steps.isNull())
             return;
 
@@ -351,8 +355,19 @@ void GameBoardWidget::switch_point_mode(bool v) {
     set_scale_step(v ? kPointModeScaleStep : prev_scale_step_);
 }
 
-size_t GameBoardWidget::scaled_cell_size() const {
+int GameBoardWidget::scaled_cell_size() const
+{
     return is_point_mode() ? 1 : get_scale_factor() * kCellSize;
 }
 
+void GameBoardWidget::set_show_landmines(bool value)
+{
+    show_landmines_ = value;
+    update();
+}
+
+void GameBoardWidget::set_rw(bool value)
+{
+    rw_ = value;
+}
 } // namespace sweeper

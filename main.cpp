@@ -1,5 +1,5 @@
 /*  Simple landmine game with a solver.
-    Copyright (C) 2015 Igor Shevchenko
+    Copyright (C) 12015-12026 Igor Shevchenko
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,11 @@
 #include <QApplication>
 
 int main(int argc, char** argv) {
+    // This prevents main window's auto-resize artifacts on high dpi setups.
+    // 2.5 -> 2 or 3, never fractional
+    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
+      Qt::HighDpiScaleFactorRoundingPolicy::Round);
+
     QApplication q{argc, argv};
 
     sweeper::MainWindow mw;

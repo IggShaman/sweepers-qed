@@ -30,9 +30,9 @@ public:
     void mark_mine(qed::FieldPosition, bool);
     void mark_exploded(qed::FieldPosition position) { edit_at(position) = CellInfo::Exploded; }
     void uncovered_safe(qed::FieldPosition, uint8_t nearby_landmines_count);
-    size_t rows() const { return field_->rows(); }
-    size_t cols() const { return field_->cols(); }
-    size_t landmines_marked() const { return landmines_marked_; }
+    index_type rows() const { return field_->rows(); }
+    index_type columns() const { return field_->columns(); }
+    index_type landmines_marked() const { return landmines_marked_; }
     qed::FieldCPtr field() const { return field_; }
     CellNeighborhoodIterator neighborhood(qed::FieldPosition);
     bool is_uncovered(qed::FieldPosition position) const
@@ -43,12 +43,12 @@ public:
     void set_game_lost() { game_lost_ = true; }
     size_t uncovered_count() const { return uncovered_count_; }
     size_t left_count() const { return data_.size() - uncovered_count_ - landmines_marked_; }
-    void dump_region(qed::FieldPosition, size_t range) const;
+    void dump_region(qed::FieldPosition, index_type range) const;
 
 private:
     size_t to_index(const qed::FieldPosition& position) const
     {
-        return field_->cols() * position.row + position.col;
+        return field_->columns() * position.row + position.column;
     }
     CellInfo& edit_at(qed::FieldPosition position) { return data_[to_index(position)]; }
 

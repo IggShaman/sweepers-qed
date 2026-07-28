@@ -6,11 +6,10 @@ namespace lp { class problem; }
 
 namespace qed
 {
-
 class GlpkSolver : public Solver {
 public:
     static constexpr float kEpsilon = 1e-3;
-    static constexpr size_t kRange = 7;
+    static constexpr index_type kRange = 7;
     using Solver::Solver;
     
 private:

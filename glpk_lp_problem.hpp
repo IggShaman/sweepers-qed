@@ -15,13 +15,13 @@ public:
     matrix() { reset(); }
     void add(int row, int col, double value);
     const dimension_vector_type& get_rows() const { return rows_; }
-    const dimension_vector_type& get_columns() const { return cols_; }
+    const dimension_vector_type& get_columns() const { return columns_; }
     const value_vector_type& get_values() const { return values_; }
     void reset();
     
 private:
     dimension_vector_type rows_;
-    dimension_vector_type cols_;
+    dimension_vector_type columns_;
     value_vector_type values_;
 };
 

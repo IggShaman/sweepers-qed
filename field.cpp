@@ -1,20 +1,21 @@
 #include "field.hpp"
 
+#include <random>
+
 namespace qed
 {
-
-void Field::reset(size_t rows, size_t cols)
+void Field::reset(index_type rows, index_type columns)
 {
     landmines_count_ = 0;
     rows_ = rows;
-    cols_ = cols;
-    data_.resize(rows_ * cols_);
+    columns_ = columns;
+    data_.resize(rows_ * columns_);
     std::fill(data_.begin(), data_.end(), false);
 }
 
-size_t Field::to_index(FieldPosition position) const
+index_type Field::to_index(FieldPosition position) const
 {
-    return position.row * cols_ + position.col;
+    return position.row * columns_ + position.column;
 }
 
 void Field::mark_landmine(FieldPosition position, bool value)
@@ -29,28 +30,28 @@ void Field::mark_landmine(FieldPosition position, bool value)
     landmines_count_ += value ? 1 : -1;
 }
 
-void Field::generate_random(size_t rows, size_t cols, size_t landmines_count)
+void Field::generate_random(index_type rows, index_type columns, index_type landmines_count)
 {
-    srand48(time(nullptr));
-    reset(rows, cols);
-
-    // TODO: throw exception?
-    if (landmines_count >= rows * cols)
+    if (rows == 0 or columns == 0 or landmines_count >= rows * columns)
     {
         return;
     }
 
+    reset(rows, columns);
+
     // For low fill rates (<= 30%), this should work well.
     landmines_count_ = landmines_count;
+
+    std::uniform_int_distribution<index_type> distribution(0, rows_ * columns_ - 1);
     while (landmines_count)
     {
-        FieldPosition position{size_t(drand48() * rows_), size_t(drand48() * cols_)};
-        if (is_landmine(position))
+        const auto idx = distribution(rng_);
+        if (data_[idx])
         {
             continue;
         }
 
-        data_[to_index(position)] = true;
+        data_[idx] = true;
         --landmines_count;
     }
 }
@@ -61,41 +62,41 @@ uint8_t Field::nearby_landmines_count(FieldPosition position) const
 
     if (position.row > 0)
     {
-        if (position.col > 0)
+        if (position.column > 0)
         {
-            count += is_landmine({position.row - 1, position.col - 1});
+            count += is_landmine({position.row - 1, position.column - 1});
         }
 
-        count += is_landmine({position.row - 1, position.col});
+        count += is_landmine({position.row - 1, position.column});
 
-        if (position.col < cols_ - 1)
+        if (position.column + 1 < columns_)
         {
-            count += is_landmine({position.row - 1, position.col + 1});
+            count += is_landmine({position.row - 1, position.column + 1});
         }
     }
 
-    if (position.col > 0)
+    if (position.column > 0)
     {
-        count += is_landmine({position.row, position.col - 1});
+        count += is_landmine({position.row, position.column - 1});
     }
 
-    if (position.col < cols_ - 1)
+    if (position.column + 1 < columns_)
     {
-        count += is_landmine({position.row, position.col + 1});
+        count += is_landmine({position.row, position.column + 1});
     }
 
     if (position.row < rows_ - 1)
     {
-        if (position.col > 0)
+        if (position.column > 0)
         {
-            count += is_landmine({position.row + 1, position.col - 1});
+            count += is_landmine({position.row + 1, position.column - 1});
         }
 
-        count += is_landmine({position.row + 1, position.col});
+        count += is_landmine({position.row + 1, position.column});
 
-        if (position.col < cols_ - 1)
+        if (position.column + 1 < columns_)
         {
-            count += is_landmine({position.row + 1, position.col + 1});
+            count += is_landmine({position.row + 1, position.column + 1});
         }
     }
 

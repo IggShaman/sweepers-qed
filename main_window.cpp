@@ -85,12 +85,12 @@ void MainWindow::setup_solver()
     solver_.reset(new qed::GlpkSolver{board});
 
     solver_->setResultHandler(
-      [this](auto ft, qed::FieldPosition position, size_t range)
+      [this](auto solver_state, qed::FieldPosition position, const std::string& errmsg)
       {
-          // QThread::usleep(0); // slow down a bit for nice animation effect
           QMetaObject::invokeMethod(
             this,
-            [this, ft, position, range] { solver_result_slot(ft, position, range); },
+            [this, solver_state, position, errmsg]
+            { handle_solver_result(solver_state, position, errmsg); },
             Qt::QueuedConnection);
       });
     solver_->startAsync();
@@ -101,7 +101,7 @@ void MainWindow::generate_new()
     show_landmines_action_->setChecked(false);
 
     auto field = std::make_shared<qed::Field>();
-    field->generate_random(new_rows_, new_cols_, new_landmines_);
+    field->generate_random(new_rows_, new_columns_, new_landmines_);
 
     auto board = std::make_shared<qed::GameBoard>();
     board->set_field(field);
@@ -117,14 +117,15 @@ void MainWindow::configure_field()
     Ui::ConfigureFieldDialog ui;
     ui.setupUi(&d);
     ui.rows_sb->setValue(new_rows_);
-    ui.cols_sb->setValue(new_cols_);
+    ui.columns_sb->setValue(new_columns_);
     ui.landmines_sb->setValue(new_landmines_);
-    if (!d.exec()) {
+    if (!d.exec())
+    {
         return;
     }
 
     new_rows_ = ui.rows_sb->value();
-    new_cols_ = ui.cols_sb->value();
+    new_columns_ = ui.columns_sb->value();
     new_landmines_ = ui.landmines_sb->value();
     generate_new();
 }
@@ -186,24 +187,24 @@ void MainWindow::game_lost()
     show_landmines_action_->setChecked(true);
 }
 
-void MainWindow::solver_result_slot(
-  qed::Solver::FeedbackState feedback_state,
+void MainWindow::handle_solver_result(
+  qed::Solver::SolverState solver_state,
   qed::FieldPosition position,
-  size_t range)
+  const std::string& errmsg)
 {
-    switch (feedback_state)
+    switch (solver_state)
     {
-    case qed::Solver::FeedbackState::kSolved:
-        game_board_widget_->update_box(position, range);
+    case qed::Solver::SolverState::kSolved:
+        game_board_widget_->update_box(position);
         update_cell_info();
         break;
 
-    case qed::Solver::FeedbackState::kSuspended:
+    case qed::Solver::SolverState::kSuspended:
         game_board_widget_->set_rw(true);
         run_solver_action_->setChecked(false);
         break;
 
-    case qed::Solver::FeedbackState::kGameLost:
+    case qed::Solver::SolverState::kGameLost:
         run_solver_action_->setChecked(false);
         game_lost();
         break;

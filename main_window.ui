@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Landmine</string>
+   <string>sweepers-∎ aka бімба-solver</string>
   </property>
   <widget class="QScrollArea" name="scrollArea"/>
   <widget class="QMenuBar" name="menubar">

@@ -4,7 +4,7 @@
 namespace lp {
 
 void matrix::reset() {
-    cols_.clear();
+    columns_.clear();
     rows_.clear();
     values_.clear();
     add(0, 0, 0); // dummy row, used due to the way glp_load_matrix works
@@ -56,11 +56,14 @@ void problem::dump_solution() {
 std::string problem::dump() {
     std::ostringstream oss;
     oss << (GLP_MIN == glp_get_obj_dir(glp_) ? "min" : "max") << "[";
-    int cols = glp_get_num_cols(glp_);
-    for (int i = 1; i <= cols; ++i) {
+    int columns = glp_get_num_cols(glp_);
+    for (int i = 1; i <= columns; ++i)
+    {
         oss << glp_get_obj_coef(glp_, i) << '*' << glp_get_col_name(glp_, i);
-        if (i < cols)
+        if (i < columns)
+        {
             oss << " + ";
+        }
     }
     oss << "]\n";
 
