@@ -1,11 +1,27 @@
-* basic updates [3/4]
-- [X] port to Qt6
-- [X] rename to sweepers-qed
-- [X] update GLPK to latest
-- [ ] fix mt issues
+* solver_generation for solver callbacks into gui thread
+
+* merge field (gt) to board [/]
+- [ ] alignas(compute-cacheline-size), round up to 128 bytes
+- [ ] stride for storage must be multiple of cachelines ^^
+- [ ] various fields [/]
+  - [ ] byte-packed field
+  - [ ] nibble-packed
+  - [ ] bit-packed split (2 bits per state, separate bitpacked gt)
+- [ ] benchmark fields [/]
+  - [ ] for access/update
+  - [ ] for computing vs reusing state for display (compute neighboring landmines count)
+- [ ] use atomics with relaxed read/write - necessary for halo cells
+- [ ] parition work across threads
 
 * add solver: OR-Tools (CP)
+
 * add solver: HiGHS (https://highs.dev)
 * add solver: SCIP (https://scipopt.org)
+
+* mt solver
+Run many solvers at once, for parts of the frontier that are far enough.
+
 * provide landmine probabilities
 * explore vulkan for rendering
+
+* make data generator for ai to train a model for prediction-based uncover

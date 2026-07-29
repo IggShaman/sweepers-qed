@@ -1,0 +1,40 @@
+
+Archived entries from file /home/igor/sweepers-qed/todo.org
+
+
+* basic updates [4/4]
+:PROPERTIES:
+:ARCHIVE_TIME: 2026-07-28 Tue 22:21
+:ARCHIVE_FILE: ~/sweepers-qed/todo.org
+:ARCHIVE_CATEGORY: todo
+:END:
+- [X] port to Qt6
+- [X] rename to sweepers-qed
+- [X] update GLPK to latest
+- [X] fix mt issues
+
+
+Archived entries from file /home/igor/sweepers-qed/todo.org
+
+
+* basic updates [4/4]
+:PROPERTIES:
+:ARCHIVE_TIME: 2026-07-28 Tue 22:21
+:ARCHIVE_FILE: ~/sweepers-qed/todo.org
+:ARCHIVE_CATEGORY: todo
+:END:
+- [X] port to Qt6
+- [X] rename to sweepers-qed
+- [X] update GLPK to latest
+- [X] fix mt issues
+ 
+
+
+* DONE separate solver and gui parts
+:PROPERTIES:
+:ARCHIVE_TIME: 2026-07-29 Wed 11:47
+:ARCHIVE_FILE: ~/sweepers-qed/todo.org
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+
