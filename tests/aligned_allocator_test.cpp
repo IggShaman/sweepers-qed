@@ -3,7 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("interior cell yields 8 neighbours at side 1")
+TEST_CASE("newly allocated data is aligned properly")
 {
     REQUIRE(reinterpret_cast<std::uintptr_t>(i::aligned_bytes<8>(1024).data()) % 8 == 0);
 

@@ -1,13 +1,13 @@
 * solver_generation for solver callbacks into gui thread
 
-* merge field (gt) to board [/]
-- [ ] alignas(compute-cacheline-size), round up to 128 bytes
+* merge field (gt) to board [1/6]
+- [X] alignas(compute-cacheline-size), round up to 128 bytes
 - [ ] stride for storage must be multiple of cachelines ^^
-- [ ] various fields [/]
+- [ ] various fields [0/3]
   - [ ] byte-packed field
   - [ ] nibble-packed
   - [ ] bit-packed split (2 bits per state, separate bitpacked gt)
-- [ ] benchmark fields [/]
+- [ ] benchmark fields [0/2]
   - [ ] for access/update
   - [ ] for computing vs reusing state for display (compute neighboring landmines count)
 - [ ] use atomics with relaxed read/write - necessary for halo cells
@@ -25,3 +25,13 @@ Run many solvers at once, for parts of the frontier that are far enough.
 * explore vulkan for rendering
 
 * make data generator for ai to train a model for prediction-based uncover
+
+
+BACKLOG
+* experiment with adding newly discovered constraints on the fly; this increases number of variables and might require too many computations
+* "global" solver mode: add all unknown cells, add constraint row which sums all them up to a number of remaining landmines
+* when simplex-based solver can't proceed, calculate/display probability of a mine under each uncovered cell
+* see if we maximize first would work faster
+* use all threads; would have to copy GLP instances into isolated processes
+* try glpk's MIP
+* see if setting a vairable to 0 and testing for feasibility is quicker

@@ -1,10 +1,16 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <new>
 
 namespace i
 {
+template <std::size_t A, class T> constexpr bool is_aligned(const T* p) noexcept
+{
+    return reinterpret_cast<std::uintptr_t>(p) % A == 0;
+}
+
 template <class T, std::size_t A> struct aligned_allocator
 {
     using value_type = T;
