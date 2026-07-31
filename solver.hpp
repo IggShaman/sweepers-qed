@@ -1,6 +1,6 @@
 #pragma once
 
-#include "board.hpp"
+#include "byte_field.hpp"
 
 #include <condition_variable>
 #include <deque>
@@ -9,10 +9,13 @@
 
 namespace qed
 {
+using byte_field_ptr = std::shared_ptr<byte_field>;
 
 class Solver
 {
-    enum class RunState : uint8_t
+    friend struct solver_access;
+
+    enum class RunState
     {
         kNew,
         kRunning,
@@ -21,37 +24,29 @@ class Solver
     };
 
 public:
-    enum SolverState : uint8_t
+    enum class SolverState
     {
         kSolved,
         kSuspended,
         kGameLost
     };
 
-    using result_handler_type = std::function<void(SolverState, FieldPosition, std::string)>;
+    using result_handler_type = std::function<void(SolverState, field_position, std::string)>;
 
-    explicit Solver(GameBoardPtr board) : board_{board} {}
+    explicit Solver(byte_field_ptr field) : field_{field} {}
     virtual ~Solver();
 
     void startAsync();
     void suspend();
     void resume();
     void stop();
-    void addPoi(FieldPosition);
+    void addPoi(field_position);
     void setResultHandler(result_handler_type handler) { result_handler_ = handler; }
 
 protected:
-    virtual bool doPoi(FieldPosition) = 0;
+    virtual bool doPoi(field_position) = 0;
 
-    struct NeighborhoodInfo
-    {
-        uint8_t landmines_count{}; // number of landmines left around current cell
-        uint8_t covered_unmarked_field_positions_count{};
-        std::array<FieldPosition, 8> covered_unmarked_field_positions;
-    };
-    NeighborhoodInfo getNeighborhoodInfo(FieldPosition) const;
-
-    GameBoardPtr board_;
+    byte_field_ptr field_;
     result_handler_type result_handler_;
 
 private:
@@ -60,8 +55,8 @@ private:
 
     std::atomic<RunState> state_{RunState::kNew};
 
-    std::mutex queue_mutex_;        // used to protect queue access
-    std::deque<FieldPosition> poi_; // cells of interest
+    std::mutex queue_mutex_;         // used to protect queue access
+    std::deque<field_position> poi_; // cells of interest
 
     std::thread thread_;
     std::mutex runner_mutex_;

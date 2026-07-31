@@ -1,6 +1,5 @@
 #pragma once
 
-#include "field.hpp"
 #include "solver.hpp"
 
 #include <QMainWindow>
@@ -18,17 +17,14 @@ class MainWindow : public QMainWindow {
 public:
     MainWindow();
     ~MainWindow();
-                 
+
 private slots:
     void action_about();
     void generate_new();
     void configure_field();
     void show_landmines_toggled(bool);
     void run_solver(bool);
-    void cell_changed(qed::FieldPosition);
-    void game_lost();
-    void
-    handle_solver_result(qed::Solver::SolverState, qed::FieldPosition, const std::string& errmsg);
+    void handle_solver_result(qed::Solver::SolverState, qed::field_position, std::string errmsg);
 
 private:
     void update_cell_info();

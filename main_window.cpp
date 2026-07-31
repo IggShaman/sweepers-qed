@@ -1,7 +1,7 @@
 #include "main_window.hpp"
-#include "board.hpp"
 #include "game_board_widget.hpp"
 #include "glpk_solver.hpp"
+#include "minefield_generator.hpp"
 
 #include "ui_configure_field_dialog.h"
 #include "ui_main_window.h"
@@ -22,8 +22,16 @@ MainWindow::MainWindow() : ui_{new Ui::MainWindow}
     game_board_widget_ = new GameBoardWidget;
     ui_->scrollArea->setWidget(game_board_widget_);
     game_board_widget_->show();
-    connect(game_board_widget_, &GameBoardWidget::cell_changed, this, &MainWindow::cell_changed);
-    connect(game_board_widget_, &GameBoardWidget::game_lost, this, &MainWindow::game_lost);
+    connect(
+      game_board_widget_,
+      &GameBoardWidget::new_poi,
+      this,
+      [this](qed::field_position position) { solver_->addPoi(position); });
+    connect(
+      game_board_widget_,
+      &GameBoardWidget::game_lost_signal,
+      this,
+      [this]() { show_landmines_action_->setChecked(true); });
 
     connect(ui_->action_About, &QAction::triggered, this, &MainWindow::action_about);
 
@@ -80,12 +88,10 @@ MainWindow::MainWindow() : ui_{new Ui::MainWindow}
 
 void MainWindow::setup_solver()
 {
-    auto board = game_board_widget_->board();
-
-    solver_.reset(new qed::GlpkSolver{board});
+    solver_.reset(new qed::GlpkSolver{game_board_widget_->field()});
 
     solver_->setResultHandler(
-      [this](auto solver_state, qed::FieldPosition position, const std::string& errmsg)
+      [this](auto solver_state, qed::field_position position, const std::string& errmsg)
       {
           QMetaObject::invokeMethod(
             this,
@@ -100,15 +106,16 @@ void MainWindow::generate_new()
 {
     show_landmines_action_->setChecked(false);
 
-    auto field = std::make_shared<qed::Field>();
-    field->generate_random(new_rows_, new_columns_, new_landmines_);
+    auto field = std::make_shared<qed::byte_field>();
+    field->reset(new_rows_, new_columns_);
+    generate_minefield(field.get(), new_landmines_);
 
-    auto board = std::make_shared<qed::GameBoard>();
-    board->set_field(field);
-    game_board_widget_->set_board(board);
+    game_board_widget_->set_field(field);
+
     setup_solver();
     update_cell_info();
     game_board_widget_->set_rw(true);
+    game_board_widget_->game_lost = false;
 }
 
 void MainWindow::configure_field()
@@ -137,7 +144,7 @@ void MainWindow::show_landmines_toggled(bool value)
 
 void MainWindow::run_solver(bool value)
 {
-    if (game_board_widget_->board()->game_lost())
+    if (game_board_widget_->game_lost)
     {
         return;
     }
@@ -165,32 +172,21 @@ void MainWindow::action_about()
       "under certain conditions. Look here for GPL3 license: http://www.gnu.org/licenses/");
 }
 
-void MainWindow::cell_changed(qed::FieldPosition position)
-{
-    solver_->addPoi(position);
-    update_cell_info();
-}
-
 void MainWindow::update_cell_info()
 {
-    landmines_info_label_->setText( //
-      QString("Landmines: %1 / %2 Uncovered: %3 Left: %4")
-        .arg(game_board_widget_->board()->landmines_marked())
-        .arg(game_board_widget_->board()->field()->landmines_count())
-        .arg(game_board_widget_->board()->uncovered_count())
-        .arg(game_board_widget_->board()->left_count()));
-}
-
-void MainWindow::game_lost()
-{
-    game_board_widget_->board()->set_game_lost();
-    show_landmines_action_->setChecked(true);
+    landmines_info_label_->setText("TODO: restore stats");
+    // landmines_info_label_->setText( //
+    //   QString("Landmines: %1 / %2 Uncovered: %3 Left: %4")
+    //     .arg(game_board_widget_->board()->landmines_marked())
+    //     .arg(game_board_widget_->board()->field()->landmines_count())
+    //     .arg(game_board_widget_->board()->uncovered_count())
+    //     .arg(game_board_widget_->board()->left_count()));
 }
 
 void MainWindow::handle_solver_result(
   qed::Solver::SolverState solver_state,
-  qed::FieldPosition position,
-  const std::string& errmsg)
+  qed::field_position position,
+  std::string errmsg)
 {
     switch (solver_state)
     {
@@ -205,8 +201,9 @@ void MainWindow::handle_solver_result(
         break;
 
     case qed::Solver::SolverState::kGameLost:
+        game_board_widget_->game_lost = true;
         run_solver_action_->setChecked(false);
-        game_lost();
+        show_landmines_action_->setChecked(true);
         break;
     };
 }

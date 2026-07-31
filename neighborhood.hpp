@@ -22,13 +22,7 @@ std::generator<field_position_type<IndexType>> neighborhood(
     {
         for (auto x = x_from; x <= x_until; ++x)
         {
-            auto position = field_position_type<IndexType>{y, x};
-            if (center_point == position)
-            {
-                continue;
-            }
-
-            co_yield position;
+            co_yield field_position_type<IndexType>{y, x};
         }
     }
 }

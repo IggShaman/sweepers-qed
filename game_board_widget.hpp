@@ -1,7 +1,7 @@
 #pragma once
 
-#include "board.hpp"
-#include "field.hpp"
+#include "byte_field.hpp"
+#include "solver.hpp"
 
 #include <QtWidgets/QWidget>
 
@@ -27,13 +27,14 @@ public:
 
     GameBoardWidget();
 
-    qed::GameBoardPtr board() { return board_; }
-    void set_board(qed::GameBoardPtr);
+    qed::byte_field_ptr field() { return field_; }
+    void set_field(qed::byte_field_ptr);
     void set_show_landmines(bool);
-    void update_cell(qed::FieldPosition);
-    void update_box(qed::FieldPosition);
+    void update_cell(qed::field_position);
+    void update_box(qed::field_position);
     void set_scale_step(int step);
     void set_rw(bool);
+    bool game_lost{};
 
 public slots:
     void zoom_in();
@@ -42,9 +43,9 @@ public slots:
     void switch_point_mode(bool);
     
 signals:
-    void cell_changed(qed::FieldPosition);
-    void game_lost();
-    
+    void game_lost_signal();
+    void new_poi(qed::field_position);
+
 protected:
     void paintEvent(QPaintEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
@@ -52,33 +53,18 @@ protected:
     bool is_point_mode() const { return scale_step_ == kPointModeScaleStep; }
     
 private:
-    void paint_cell(QPainter&, qed::FieldPosition);
-    void paint_point_cell(QPainter&, qed::FieldPosition);
-    qed::index_type x2column(size_t x)
-    {
-        return static_cast<qed::index_type>(
-          is_point_mode() ? x : x / get_scale_factor() / kCellSize);
-    }
-    qed::index_type y2row(size_t y)
-    {
-        return static_cast<qed::index_type>(
-          is_point_mode() ? y : y / get_scale_factor() / kCellSize);
-    }
-    size_t row2y(qed::index_type row)
-    {
-        return is_point_mode() ? static_cast<size_t>(row)
-                               : get_scale_factor() * static_cast<size_t>(row) * kCellSize;
-    }
-    size_t column2x(size_t column)
-    {
-        return is_point_mode() ? static_cast<size_t>(column)
-                               : get_scale_factor() * static_cast<size_t>(column) * kCellSize;
-    }
+    void paint_cell(QPainter&, qed::field_position);
+    void paint_point_cell(QPainter&, qed::field_position);
+    qed::index_type x2column(size_t x);
+    qed::index_type y2row(size_t y);
+    size_t row2y(qed::index_type row);
+    size_t column2x(size_t column);
     float get_scale_factor() const { return scale_step_ * kScaleStep; }
     int scaled_cell_size() const;
     void update_widget_size();
 
-    qed::GameBoardPtr board_;
+    qed::byte_field_ptr field_;
+
     bool show_landmines_{};
     bool rw_{};
     
@@ -91,5 +77,27 @@ private:
     std::size_t scale_step_ = 20;
     std::size_t prev_scale_step_ = 20; // go back to this when toggling scale mode
 };
+
+inline qed::index_type GameBoardWidget::x2column(size_t x)
+{
+    return static_cast<qed::index_type>(is_point_mode() ? x : x / get_scale_factor() / kCellSize);
+}
+
+inline qed::index_type GameBoardWidget::y2row(size_t y)
+{
+    return static_cast<qed::index_type>(is_point_mode() ? y : y / get_scale_factor() / kCellSize);
+}
+
+inline size_t GameBoardWidget::row2y(qed::index_type row)
+{
+    return is_point_mode() ? static_cast<size_t>(row)
+                           : get_scale_factor() * static_cast<size_t>(row) * kCellSize;
+}
+
+inline size_t GameBoardWidget::column2x(size_t column)
+{
+    return is_point_mode() ? static_cast<size_t>(column)
+                           : get_scale_factor() * static_cast<size_t>(column) * kCellSize;
+}
 
 } // namespace sweeper

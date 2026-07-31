@@ -1,15 +1,16 @@
 #include "game_board_widget.hpp"
-#include "board.hpp"
 
 #include <QPaintEvent>
 #include <QPainter>
 
 #include <algorithm>
 
+#include "logger.hpp"
+
 namespace sweeper
 {
 GameBoardWidget::GameBoardWidget()
-    : board_{new qed::GameBoard}, cell_border_{200, 200, 200}, cell_opened_bg_{220, 220, 220},
+    : field_{new qed::byte_field}, cell_border_{200, 200, 200}, cell_opened_bg_{220, 220, 220},
       cell_unknown_bg_{100, 100, 100},
       per_count_colors_text_{
         cell_opened_bg_,
@@ -34,20 +35,19 @@ GameBoardWidget::GameBoardWidget()
 {
     cell_font_.setPixelSize(kCellSize - 4);
     cell_font_.setBold(true);
-    board_->set_field(std::make_shared<qed::Field>());
 }
 
-void GameBoardWidget::set_board(qed::GameBoardPtr b)
+void GameBoardWidget::set_field(qed::byte_field_ptr new_field)
 {
-    board_ = b;
+    field_ = new_field;
     update_widget_size();
 }
 
 void GameBoardWidget::update_widget_size()
 {
     setFixedSize( //
-      board_->columns() * scaled_cell_size(),
-      board_->rows() * scaled_cell_size());
+      field_->columns() * scaled_cell_size(),
+      field_->rows() * scaled_cell_size());
     update();
 }
 
@@ -101,7 +101,7 @@ void GameBoardWidget::paintEvent(QPaintEvent* event)
     }
 }
 
-void GameBoardWidget::paint_cell(QPainter& painter, qed::FieldPosition position)
+void GameBoardWidget::paint_cell(QPainter& painter, qed::field_position position)
 {
     painter.save();
 
@@ -129,51 +129,35 @@ void GameBoardWidget::paint_cell(QPainter& painter, qed::FieldPosition position)
         painter.setFont(cell_font_);
     }
 
-    auto cell_info = board_->at(position);
-    switch (cell_info)
+    auto cell = field_->cell_at(position);
+    if (cell.is_marked_as_landmine())
     {
-    case qed::GameBoard::CellInfo::Exploded:
-        painter.fillRect(r, QBrush(Qt::black));
-        break;
-
-    case qed::GameBoard::CellInfo::MarkedLandmine:
         painter.fillRect(r, QBrush(Qt::red));
-        break;
-
-    case qed::GameBoard::CellInfo::Unknown:
-        painter.fillRect(r, cell_unknown_bg_);
-        break;
-
-    case qed::GameBoard::CellInfo::N0:
-    case qed::GameBoard::CellInfo::N1:
-    case qed::GameBoard::CellInfo::N2:
-    case qed::GameBoard::CellInfo::N3:
-    case qed::GameBoard::CellInfo::N4:
-    case qed::GameBoard::CellInfo::N5:
-    case qed::GameBoard::CellInfo::N6:
-    case qed::GameBoard::CellInfo::N7:
-    case qed::GameBoard::CellInfo::N8:
+    }
+    else if (cell.is_uncovered())
     {
-        bool is_zero = qed::GameBoard::CellInfo::N0 == cell_info;
+        auto count = field_->nearby_landmines_count(position);
 
         if (scale_step_ >= kDrawTextScaleStep)
         {
             painter.fillRect(r, cell_opened_bg_);
-            if (!is_zero)
+            if (count)
             {
-                painter.setPen(per_count_colors_text_[static_cast<int>(cell_info)]);
-                painter.drawText(1, kCellSize - 1, QString::number(static_cast<int>(cell_info)));
+                painter.setPen(per_count_colors_text_[count]);
+                painter.drawText(1, kCellSize - 1, QString::number(count));
             }
         }
         else
         {
-            painter.fillRect(r, per_count_colors_box_[static_cast<int>(cell_info)]);
+            painter.fillRect(r, per_count_colors_box_[count]);
         }
-        break;
     }
-    };
+    else // covered
+    {
+        painter.fillRect(r, cell_unknown_bg_);
+    }
 
-    if (show_landmines_ and board_->field()->is_landmine(position))
+    if (show_landmines_ and field_->cell_at(position).is_landmine_groundtruth())
     {
         if (scale_step_ >= kDrawTextScaleStep)
         {
@@ -196,21 +180,22 @@ void GameBoardWidget::paint_cell(QPainter& painter, qed::FieldPosition position)
     painter.restore();
 }
 
-void GameBoardWidget::paint_point_cell(QPainter& painter, qed::FieldPosition position)
+void GameBoardWidget::paint_point_cell(QPainter& painter, qed::field_position position)
 {
-    auto cell_info = board_->at(position);
-    switch (cell_info)
+    auto cell = field_->cell_at(position);
+
+    if (cell.is_marked_as_landmine())
     {
-    case qed::GameBoard::CellInfo::Exploded:
-        painter.setPen(Qt::black);
-        break;
-
-    case qed::GameBoard::CellInfo::MarkedLandmine:
         painter.setPen(Qt::red);
-        break;
-
-    case qed::GameBoard::CellInfo::Unknown:
-        if (show_landmines_ and board_->field()->is_landmine(position))
+    }
+    else if (cell.is_uncovered())
+    {
+        auto count = field_->nearby_landmines_count(position);
+        painter.setPen(count ? per_count_colors_box_[count] : cell_opened_bg_);
+    }
+    else // is_covered
+    {
+        if (show_landmines_ and cell.is_landmine_groundtruth())
         {
             painter.setPen(Qt::darkRed);
         }
@@ -218,61 +203,45 @@ void GameBoardWidget::paint_point_cell(QPainter& painter, qed::FieldPosition pos
         {
             painter.setPen(cell_unknown_bg_);
         }
-        break;
-
-    case qed::GameBoard::CellInfo::N0:
-        painter.setPen(cell_opened_bg_);
-        break;
-
-    case qed::GameBoard::CellInfo::N1:
-    case qed::GameBoard::CellInfo::N2:
-    case qed::GameBoard::CellInfo::N3:
-    case qed::GameBoard::CellInfo::N4:
-    case qed::GameBoard::CellInfo::N5:
-    case qed::GameBoard::CellInfo::N6:
-    case qed::GameBoard::CellInfo::N7:
-    case qed::GameBoard::CellInfo::N8:
-        painter.setPen(per_count_colors_box_[static_cast<int>(cell_info)]);
-        break;
-    };
+    }
 
     painter.drawPoint(position.column, position.row);
 }
 
 void GameBoardWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-    if (!rw_ or board_->game_lost())
+    if (!rw_ or game_lost)
+    {
         return;
+    }
 
     const auto mouse_position = event->position().toPoint();
 
-    qed::FieldPosition field_position{
-      static_cast<qed::index_type>(std::clamp(y2row(mouse_position.y()), 0, board_->rows() - 1)),
+    qed::field_position field_position{
+      static_cast<qed::index_type>(std::clamp(y2row(mouse_position.y()), 0, field_->rows() - 1)),
       static_cast<qed::index_type>(
-        std::clamp(x2column(mouse_position.x()), 0, board_->columns() - 1))};
+        std::clamp(x2column(mouse_position.x()), 0, field_->columns() - 1))};
 
     switch (event->button())
     {
     case Qt::LeftButton: {
         // NOTE: no modifiers pressed
-        if (board_->at(field_position) != qed::GameBoard::CellInfo::Unknown)
+        auto cell = field_->cell_at(field_position);
+        if (cell.is_uncovered())
         {
             return;
         }
 
         event->accept();
-        if (board_->field()->is_landmine(field_position))
+        cell.set_uncovered();
+        if (cell.is_landmine_groundtruth())
         {
-            board_->mark_exploded(field_position);
-            emit cell_changed(field_position);
-            emit game_lost();
+            game_lost = true;
+            emit game_lost_signal();
         }
         else
         {
-            board_->uncovered_safe(
-              field_position,
-              board_->field()->nearby_landmines_count(field_position));
-            emit cell_changed(field_position);
+            emit new_poi(field_position);
         }
 
         update_cell(field_position);
@@ -281,23 +250,22 @@ void GameBoardWidget::mouseReleaseEvent(QMouseEvent* event)
 
     case Qt::RightButton: {
         event->accept();
-        switch (board_->at(field_position))
+        auto cell = field_->cell_at(field_position);
+        if (cell.is_uncovered())
         {
-        case qed::GameBoard::CellInfo::MarkedLandmine:
-            board_->mark_mine(field_position, false);
-            update_cell(field_position);
-            emit cell_changed(field_position);
             break;
+        }
 
-        case qed::GameBoard::CellInfo::Unknown:
-            board_->mark_mine(field_position, true);
+        if (cell.is_marked_as_landmine())
+        {
+            cell.clear_marked_as_landmine();
             update_cell(field_position);
-            emit cell_changed(field_position);
-            break;
-
-        default:
-            break;
-        };
+        }
+        else
+        {
+            cell.set_marked_as_landmine();
+            update_cell(field_position);
+        }
         break;
     }
 
@@ -306,7 +274,7 @@ void GameBoardWidget::mouseReleaseEvent(QMouseEvent* event)
     };
 }
 
-void GameBoardWidget::update_cell(qed::FieldPosition position)
+void GameBoardWidget::update_cell(qed::field_position position)
 {
     if (is_point_mode())
     {
@@ -322,7 +290,7 @@ void GameBoardWidget::update_cell(qed::FieldPosition position)
     }
 }
 
-void GameBoardWidget::update_box(qed::FieldPosition center)
+void GameBoardWidget::update_box(qed::field_position center)
 {
     auto size = is_point_mode() ? 1 : scaled_cell_size();
     update(center.column, center.row, size, size);

@@ -21,9 +21,21 @@ target_include_directories(byte_field_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(byte_field_test PRIVATE Catch2::Catch2WithMain)
 set_target_properties(byte_field_test PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
 
+add_executable(generate_minefield_test generate_minefield_test.cpp)
+target_include_directories(generate_minefield_test PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(generate_minefield_test PRIVATE Catch2::Catch2WithMain)
+set_target_properties(generate_minefield_test PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
+
+add_executable(glpk_solver_test glpk_solver_test.cpp)
+target_include_directories(glpk_solver_test PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(glpk_solver_test PRIVATE Catch2::Catch2WithMain qed_core)
+set_target_properties(glpk_solver_test PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
+
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(Catch)
 
 catch_discover_tests(neighborhood_test)
 catch_discover_tests(aligned_allocator_test)
 catch_discover_tests(byte_field_test)
+catch_discover_tests(generate_minefield_test)
+catch_discover_tests(glpk_solver_test)

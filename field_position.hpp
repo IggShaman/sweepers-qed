@@ -33,8 +33,7 @@ inline std::ostream& operator<<(std::ostream& os, const field_position_type<T>& 
 }
 
 using index_type = int32_t;
-using FieldPosition = field_position_type<index_type>;
-using field_position = FieldPosition;
+using field_position = field_position_type<index_type>;
 
 } // namespace qed
 

@@ -53,11 +53,14 @@ class byte_field
     friend struct byte_field_access;
 
 public:
+    using cell_type = byte_field_cell;
+
     static constexpr std::size_t alignment = 128;
 
     void reset(index_type rows, index_type columns);
-    byte_field_cell cell_at(field_position);
-    uint8_t nearby_landmines_count(field_position);
+    cell_type cell_at(field_position);
+    cell_type operator[](field_position);
+    int nearby_landmines_count(field_position);
     index_type rows() const { return rows_; }
     index_type columns() const { return columns_; }
     std::size_t index_at(field_position);
@@ -72,6 +75,28 @@ private:
     index_type row_stride_{};
     i::aligned_bytes<alignment> data_;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const byte_field_cell& cell)
+{
+    os << "[";
+    if (cell.is_landmine_groundtruth())
+    {
+        os << "mine ";
+    }
+
+    if (cell.is_uncovered())
+    {
+        os << "uncovered ";
+    }
+
+    if (cell.is_marked_as_landmine())
+    {
+        os << "marked ";
+    }
+    os << ']';
+
+    return os;
+}
 
 inline std::uint8_t* byte_field::data() noexcept
 {
@@ -167,16 +192,21 @@ inline std::size_t byte_field::index_at(field_position position)
     return position.row * row_stride_ + position.column;
 }
 
-inline byte_field_cell byte_field::cell_at(field_position position)
+inline byte_field::cell_type byte_field::cell_at(field_position position)
 {
     return byte_field_cell{std::atomic_ref<uint8_t>(data()[index_at(position)])};
 }
 
-inline uint8_t byte_field::nearby_landmines_count(field_position position)
+inline byte_field::cell_type byte_field::operator[](field_position position)
+{
+    return cell_at(position);
+}
+
+inline int byte_field::nearby_landmines_count(field_position position)
 {
     auto cell = cell_at(position);
     const uint8_t b = cell.ref.load(std::memory_order_relaxed);
-    uint8_t count = b >> 4;
+    int count = b >> 4;
     if (count > 0)
     {
         return count - 1;

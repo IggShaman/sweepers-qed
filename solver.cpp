@@ -68,74 +68,17 @@ void Solver::stop()
     cond_.notify_one();
 }
 
-void Solver::addPoi(FieldPosition position)
+void Solver::addPoi(field_position position)
 {
     std::lock_guard<std::mutex> lock{queue_mutex_};
     poi_.push_back(position);
-}
-
-Solver::NeighborhoodInfo Solver::getNeighborhoodInfo(FieldPosition position) const
-{
-    NeighborhoodInfo neighborhood;
-
-    auto cell_info = board_->at(position);
-    switch (cell_info)
-    {
-    case GameBoard::CellInfo::Exploded:
-    case GameBoard::CellInfo::MarkedLandmine:
-    case GameBoard::CellInfo::Unknown:
-        I_FAIL(
-          "internal error: cell " << position << " is of type " << static_cast<int>(cell_info)
-                                  << ": not a free open one");
-        break;
-
-    case GameBoard::CellInfo::N0:
-    case GameBoard::CellInfo::N1:
-    case GameBoard::CellInfo::N2:
-    case GameBoard::CellInfo::N3:
-    case GameBoard::CellInfo::N4:
-    case GameBoard::CellInfo::N5:
-    case GameBoard::CellInfo::N6:
-    case GameBoard::CellInfo::N7:
-    case GameBoard::CellInfo::N8:
-        neighborhood.landmines_count = static_cast<index_type>(cell_info);
-        break;
-    };
-
-    {
-        auto it = board_->neighborhood(position);
-        while (it)
-        {
-            switch (it.at())
-            {
-            case GameBoard::CellInfo::MarkedLandmine:
-                if (neighborhood.landmines_count > 0)
-                {
-                    --neighborhood.landmines_count;
-                }
-                break;
-
-            case GameBoard::CellInfo::Unknown:
-                neighborhood.covered_unmarked_field_positions
-                  [neighborhood.covered_unmarked_field_positions_count++] = *it;
-                break;
-
-            default:
-                break;
-            }
-
-            ++it;
-        }
-    }
-
-    return neighborhood;
 }
 
 void Solver::async_solver_runner()
 {
     while (ok_to_run())
     {
-        FieldPosition poi;
+        field_position poi;
 
         {
             std::unique_lock<std::mutex> lock{queue_mutex_};

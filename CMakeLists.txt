@@ -18,8 +18,6 @@ SET(CMAKE_AUTORCC ON)
 #
 add_library(
   qed_core
-  board.cpp
-  field.cpp
   solver.cpp
   glpk_solver.cpp
   glpk_lp_problem.cpp
