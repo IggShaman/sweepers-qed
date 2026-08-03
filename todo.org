@@ -1,18 +1,46 @@
-* solver_generation for solver callbacks into gui thread
+* solver benchmark [4/8]
+- [X] headless
+- [X] benchmark: pin to efficiency cores
+- [X] save result as png
+- [X] read field_config from a toml file
+- [ ] implement make_sample_fields: generate, save to a toml file
+- [ ] save 100 seeded large fields
+- [ ] run each a few times, print/save results
+- [ ] move to benchmarks/ toplevel folder?
 
-* merge field (gt) to board [3/7]
-- [X] alignas(compute-cacheline-size), round up to 128 bytes
-- [X] stride for storage must be multiple of cachelines ^^
-- [X] ut for generate_minefield
-- [-] various field storage formats [1/3]
-  - [X] byte-packed field
-  - [ ] nibble-packed
-  - [ ] bit-packed split (2 bits per state, separate bitpacked gt)
-- [ ] benchmark fields [0/2]
-  - [ ] for access/update
-  - [ ] for computing vs reusing state for display (compute neighboring landmines count)
-- [ ] use atomics with relaxed read/write - necessary for halo cells
-- [ ] parition work across threads
+* glpk frontier
+- [ ] review
+- [ ] benchmark: skip poi if its 8-neigh is fully solved
+- [ ] measure frontier size (collect stats, plot)
+  Use pre-saved large fields for this.
+- [ ] benchmark: poi queue: stack rather than a deque
+
+* solver_generation for solver callbacks into gui thread
+  protects against UB access when a field is updated, but a callback
+  is delivered for an old one
+
+* gui updates: run at some fixed fps, update regions at once
+  glpk solver: emit update only when we are done with the whole 15x15 block;
+  emit only if anything was changed.
+
+* glpk: see if setting a vairable to 0/1 and testing for feasibility is quicker
+
+* storage format: nibble-packed
+
+* storage format: bit-packed split (2 bits per state, separate bitpacked gt)
+
+
+* benchmark fields
+- [ ] for access/update
+- [ ] for computing vs reusing state for display (compute neighboring landmines count)
+
+* parallel solver [0/4]
+- [ ] extract solver mt parts into a separate orchestrator class
+- [ ] new pois: add cross-parition queues, one per solver thread
+- [ ] launch workers
+- [ ] parititon assignment [0/2]
+  - [ ] based on partition % solvers_count
+  - [ ] based on whoever picks the top poi; maintain per-solver partition assignment
 
 * glpk solver improvements [5/14]
 - [X] replace ::dump() with glpk's apis
@@ -20,16 +48,7 @@
 - [X] ~solver: call glp_free_env()
 - [X] add unit tests
 - [X] show visual updates
-- [ ] solver benchmark [0/3]
-  - [ ] headless
-  - [ ] 100 seeded large fields, pre-uncover
-  - [ ] pin to efficiency cores
-  - [ ] run each a few times, print results
-  - [ ] save result as png
-- [ ] maintain frontier: a set of uncovered points to explore [0/1]
-  - [ ] skip poi if its 8-neigh is solved
 - [ ] warmup: do it only once
-- [ ] extract solver mt parts into a separate orchestrator class, test it
 - [ ] keep growing a problem until it gets too slow to iterate on
 - [ ] use glp_erase_prob(P) between problems, faster this way
 - [ ] for reducing problem over time: glp_del_rows(P, count, num) / glp_del_cols(P, count, num)
@@ -41,26 +60,18 @@
       GLP_DUAL is the right choice. That's your outer loop: a cell gets uncovered,
       so you fix its column and tighten a clue row.
 - [ ] use glp_exact when min/max is >=e close to 0/1 - slower, better ceritifcation
-  
-* add solver: OR-Tools (CP)
 
+* add solver: OR-Tools (CP)
 * add solver: HiGHS (https://highs.dev)
 * add solver: SCIP (https://scipopt.org)
+* add solver: Soplex
 
-* mt solver
-Run many solvers at once, for parts of the frontier that are far enough.
-
-* provide landmine probabilities
 * explore vulkan for rendering
 
 * make data generator for ai to train a model for prediction-based uncover
-
 
 BACKLOG
 * experiment with adding newly discovered constraints on the fly; this increases number of variables and might require too many computations
 * "global" solver mode: add all unknown cells, add constraint row which sums all them up to a number of remaining landmines
 * when simplex-based solver can't proceed, calculate/display probability of a mine under each uncovered cell
 * see if we maximize first would work faster
-* use all threads; would have to copy GLP instances into isolated processes
-* try glpk's MIP
-* see if setting a vairable to 0 and testing for feasibility is quicker

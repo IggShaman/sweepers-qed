@@ -1,11 +1,3 @@
-include(FetchContent)
-FetchContent_Declare(
-  Catch2
-  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG v3.15.3
-)
-FetchContent_MakeAvailable(Catch2)
-
 add_executable(neighborhood_test neighborhood_test.cpp)
 target_include_directories(neighborhood_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(neighborhood_test PRIVATE Catch2::Catch2WithMain)
@@ -40,7 +32,36 @@ catch_discover_tests(byte_field_test)
 catch_discover_tests(generate_minefield_test)
 catch_discover_tests(glpk_solver_test)
 
-add_executable(solver_benchmark solver_benchmark.cpp)
+add_library(
+  benchmarks_base
+  field_config.cpp
+)
+target_include_directories(benchmarks_base PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(
+  benchmarks_base
+  PRIVATE
+  qed_core
+  qed_debug
+  tomlplusplus::tomlplusplus)
+set_target_properties(benchmarks_base PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
+
+add_executable(
+  solver_benchmark
+  solver_benchmark.cpp
+  benchmark_options.cpp
+)
 target_include_directories(solver_benchmark PRIVATE ${CMAKE_SOURCE_DIR})
-target_link_libraries(solver_benchmark PRIVATE Catch2::Catch2WithMain qed_core qed_debug)
+target_link_libraries(
+  solver_benchmark
+  PRIVATE
+  benchmarks_base
+  CLI11::CLI11)
 set_target_properties(solver_benchmark PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
+
+add_executable(
+  make_sample_fields
+  make_sample_fields.cpp
+)
+target_include_directories(make_sample_fields PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(make_sample_fields PRIVATE benchmarks_base CLI11::CLI11 qed_core)
+set_target_properties(make_sample_fields PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)

@@ -100,12 +100,12 @@ void problem::dump()
            << sensitivity_analysis_file_name << "\n";
 }
 
-bool problem::presolve()
+std::expected<void, int> problem::presolve()
 {
     glp_opt_.presolve = GLP_ON;
-    auto rv = solve();
+    auto result = solve();
     glp_opt_.presolve = GLP_OFF;
-    return rv;
+    return result;
 }
 
 } // namespace lp

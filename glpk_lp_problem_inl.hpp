@@ -7,11 +7,14 @@ inline void matrix::add(int row, int col, double value)
     values_.push_back(value);
 }
 
-inline bool problem::solve()
+inline std::expected<void, int> problem::solve()
 {
-    last_ec_ = glp_simplex(glp_, &glp_opt_);
-    //I_ASSERT(!last_ec_, EX_LOG("ERROR: " << lp::problem::errmsg(last_ec_)));
-    return get_status() == status::kOPT;
+    auto error_code = glp_simplex(glp_, &glp_opt_);
+    if (get_status() == status::kOPT)
+    {
+        return {};
+    }
+    return std::unexpected{error_code};
 }
 
 } // namespace lp

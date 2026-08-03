@@ -38,3 +38,15 @@ Archived entries from file /home/igor/sweepers-qed/todo.org
 :ARCHIVE_TODO: DONE
 :END:
 
+
+* merge field (gt) to board [4/4]
+:PROPERTIES:
+:ARCHIVE_TIME: 2026-08-03 Mon 20:19
+:ARCHIVE_FILE: ~/sweepers-qed/todo.org
+:ARCHIVE_CATEGORY: todo
+:END:
+- [X] alignas(compute-cacheline-size), round up to 128 bytes
+- [X] stride for storage must be multiple of cachelines ^^
+- [X] ut for generate_minefield
+- [X] use atomics with relaxed read/write - necessary for halo cells
+

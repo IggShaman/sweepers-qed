@@ -220,10 +220,12 @@ void GlpkSolver::prepare_block(
 
     lp_problem.set_matrix(m);
 
-    if (!lp_problem.presolve())
+    auto presolve_result = lp_problem.presolve();
+
+    if (!presolve_result)
     {
-        errlog << "ERROR: could not presolve: " << lp_problem.last_errmsg() << "\npoi=" << poi
-               << "\n";
+        errlog << "ERROR: could not presolve: " << lp_problem.errmsg(presolve_result.error())
+               << "\npoi=" << poi << "\n";
         lp_problem.dump();
         std::abort();
     }

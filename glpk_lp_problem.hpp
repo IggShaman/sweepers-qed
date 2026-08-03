@@ -1,5 +1,6 @@
 #pragma once
 
+#include <expected>
 #include <vector>
 
 #include <glpk.h>
@@ -100,14 +101,13 @@ public:
     
     void set_matrix(const matrix&);
     double get_objective_value() { return glp_get_obj_val(glp_); }
-    
-    bool solve();
-    bool presolve();
-    static const char* errmsg(int ec) { return kErrorMessages[ec]; }
+
+    std::expected<void, int> solve();
+    std::expected<void, int> presolve();
+    static const char* errmsg(int error_code) { return kErrorMessages[error_code]; }
     static const char* kErrorMessages[];
     void dump_solution();
     status get_status() { return static_cast<status>(glp_get_status(glp_)); }
-    const char* last_errmsg() const { return errmsg(last_ec_); }
 
     void dump();
     void set_verbose(int v) { glp_opt_.msg_lev = v; }
@@ -115,7 +115,6 @@ public:
 private:
     glp_prob* glp_{};
     glp_smcp glp_opt_;
-    int last_ec_{}; // error code for the last call to the solver
 };
 
 } // namespace lp
