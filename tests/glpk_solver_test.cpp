@@ -1,54 +1,11 @@
+#include "field_utils.hpp"
 #include "glpk_lp_problem.hpp"
 #include "glpk_solver.hpp"
+#include "glpk_solver_access.hpp"
+#include "logger.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 #include <unordered_set>
-
-namespace qed
-{
-struct solver_access
-{
-protected:
-    static std::deque<field_position>& get_poi(Solver& s) { return s.poi_; }
-};
-
-struct glpk_solver_access : public solver_access
-{
-protected:
-    static void run_prepare_block(
-      GlpkSolver& s,
-      lp::problem& lp_problem,
-      field_position pos,
-      GlpkSolver::variables_map_type& vars)
-    {
-        s.prepare_block(lp_problem, pos, vars);
-    }
-
-    static bool
-    run_test_block(GlpkSolver& s, lp::problem& lp_problem, GlpkSolver::variables_map_type& vars)
-    {
-        return s.test_block(lp_problem, vars);
-    }
-};
-
-size_t count_landmines(auto* field)
-{
-    size_t count{};
-    for (qed::index_type j = 0; j < field->rows(); ++j)
-    {
-        for (qed::index_type i = 0; i < field->columns(); ++i)
-        {
-            auto cell = field->cell_at({j, i});
-            if (cell.is_landmine_groundtruth())
-            {
-                ++count;
-            }
-        }
-    }
-
-    return count;
-}
-} // namespace qed
 
 TEST_CASE_METHOD(qed::glpk_solver_access, "3x3 classic")
 {
@@ -80,7 +37,7 @@ TEST_CASE_METHOD(qed::glpk_solver_access, "3x3 classic")
         REQUIRE(vars.contains({1, 1}) == true);
         REQUIRE(vars.contains({1, 2}) == true);
 
-        run_test_block(solver, lp_problem, vars);
+        REQUIRE(run_test_block(solver, lp_problem, vars));
 
         auto cell01 = field->cell_at({0, 1});
         REQUIRE(cell01.is_uncovered());

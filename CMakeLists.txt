@@ -28,6 +28,11 @@ target_link_libraries(qed_core PUBLIC Threads::Threads glpk)
 target_compile_features(qed_core PUBLIC cxx_std_26)
 set_target_properties(qed_core PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
 
+add_library(
+  qed_debug
+  byte_field_image_saver.cpp
+)
+
 #
 # The GUI application
 #
@@ -45,6 +50,11 @@ target_link_libraries(
   qed_core
   Qt6::Core
   Qt6::Widgets)
+
+target_link_libraries(
+  qed_debug
+  qed_core
+  Qt6::Gui)
 
 include(CTest)
 if(BUILD_TESTING)

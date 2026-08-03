@@ -42,6 +42,10 @@ public:
     void stop();
     void addPoi(field_position);
     void setResultHandler(result_handler_type handler) { result_handler_ = handler; }
+    // Used by e.g. benchmarks and unit tests; suspends until the solver
+    // itself ends up in a "suspended" state.
+    // Don't forget to run the solver first.
+    void wait_for_completion();
 
 protected:
     virtual bool doPoi(field_position) = 0;

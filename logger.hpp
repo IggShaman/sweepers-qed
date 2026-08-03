@@ -81,3 +81,6 @@ public:
         std::cerr << s;                                 \
         throw i::exception(s);                          \
     }
+
+#define SHOW(...) #__VA_ARGS__ "=" << (__VA_ARGS__)
+#define SHOW_(...) #__VA_ARGS__ "=" << (__VA_ARGS__) << ' '

@@ -28,6 +28,7 @@ struct byte_field_cell
     bool is_marked_as_landmine() const;
     void set_marked_as_landmine() const;
     void clear_marked_as_landmine() const;
+    int nearby_landmines_count_cached() const;
 
     std::atomic_ref<std::uint8_t> ref;
 };
@@ -86,7 +87,7 @@ inline std::ostream& operator<<(std::ostream& os, const byte_field_cell& cell)
 
     if (cell.is_uncovered())
     {
-        os << "uncovered ";
+        os << "uncovered nearby_mines:" << cell.nearby_landmines_count_cached();
     }
 
     if (cell.is_marked_as_landmine())
@@ -164,6 +165,11 @@ inline void byte_field_cell::clear_marked_as_landmine() const
     return ref.store(
       ref.load(std::memory_order_relaxed) & ~kMarkedAsLandmineMask,
       std::memory_order_relaxed);
+}
+
+inline int byte_field_cell::nearby_landmines_count_cached() const
+{
+    return static_cast<int>(ref.load(std::memory_order_relaxed) >> 4) - 1;
 }
 
 inline void byte_field::reset(index_type rows, index_type columns)

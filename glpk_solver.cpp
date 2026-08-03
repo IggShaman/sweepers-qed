@@ -55,13 +55,23 @@ bool GlpkSolver::test_block(lp::problem& lp_problem, variables_map_type& vars)
             {
                 std::ostringstream oss;
                 oss << "Game is lost at " << v.first << ": should've been empty, has a mine";
-                result_handler_(SolverState::kGameLost, {}, oss.str());
+                if (result_handler_)
+                {
+                    result_handler_(SolverState::kGameLost, {}, oss.str());
+                }
+                else
+                {
+                    errlog << oss.str() << "\n";
+                }
                 return false;
             }
 
             cell.set_uncovered();
             lp_problem.set_column_fixed_bound(v.second, 0);
-            result_handler_(SolverState::kSolved, v.first, {});
+            if (result_handler_)
+            {
+                result_handler_(SolverState::kSolved, v.first, {});
+            }
             addPoi(v.first);
         }
         else
@@ -76,13 +86,23 @@ bool GlpkSolver::test_block(lp::problem& lp_problem, variables_map_type& vars)
                 {
                     std::ostringstream oss;
                     oss << "Calculated " << v.first << " to contain a mine, but it doesn't";
-                    result_handler_(SolverState::kGameLost, {}, oss.str());
+                    if (result_handler_)
+                    {
+                        result_handler_(SolverState::kGameLost, {}, oss.str());
+                    }
+                    else
+                    {
+                        errlog << oss.str() << "\n";
+                    }
                     return false;
                 }
 
                 cell.set_marked_as_landmine();
                 lp_problem.set_column_fixed_bound(v.second, 1);
-                result_handler_(SolverState::kSolved, v.first, {});
+                if (result_handler_)
+                {
+                    result_handler_(SolverState::kSolved, v.first, {});
+                }
                 addPoi(v.first);
             }
         }

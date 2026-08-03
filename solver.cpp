@@ -84,9 +84,18 @@ void Solver::async_solver_runner()
             std::unique_lock<std::mutex> lock{queue_mutex_};
             if (poi_.empty())
             {
-                state_ = RunState::kSuspended;
                 lock.unlock();
-                result_handler_(SolverState::kSuspended, {}, {});
+
+                {
+                    std::unique_lock lock{runner_mutex_};
+                    state_ = RunState::kSuspended;
+                    cond_.notify_one();
+                }
+
+                if (result_handler_)
+                {
+                    result_handler_(SolverState::kSuspended, {}, {});
+                }
                 continue;
             }
 
@@ -98,10 +107,27 @@ void Solver::async_solver_runner()
         {
             std::unique_lock<std::mutex> lock{queue_mutex_};
             state_ = RunState::kExit;
+            cond_.notify_one();
             return;
         }
 
-        result_handler_(SolverState::kSolved, poi, {});
+        if (result_handler_)
+        {
+            result_handler_(SolverState::kSolved, poi, {});
+        }
     }
+}
+
+void Solver::wait_for_completion()
+{
+    std::unique_lock lock{runner_mutex_};
+
+    if (state_ != RunState::kRunning and state_ != RunState::kSuspended)
+    {
+        errlog << "Solver is not running or suspended!\n";
+        abort();
+    }
+
+    cond_.wait(lock, [this] { return state_ == RunState::kSuspended; });
 }
 } // namespace qed

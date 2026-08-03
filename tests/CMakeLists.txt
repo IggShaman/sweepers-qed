@@ -39,3 +39,8 @@ catch_discover_tests(aligned_allocator_test)
 catch_discover_tests(byte_field_test)
 catch_discover_tests(generate_minefield_test)
 catch_discover_tests(glpk_solver_test)
+
+add_executable(solver_benchmark solver_benchmark.cpp)
+target_include_directories(solver_benchmark PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(solver_benchmark PRIVATE Catch2::Catch2WithMain qed_core qed_debug)
+set_target_properties(solver_benchmark PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)

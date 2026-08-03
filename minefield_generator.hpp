@@ -8,7 +8,8 @@
 namespace qed
 {
 // For regular fill rates (<= 20%), this should work fine.
-template <typename Field> bool generate_minefield(Field* field, size_t total_landmines_count)
+template <typename Field>
+bool generate_minefield(Field* field, size_t total_landmines_count, std::optional<size_t> seed = {})
 {
     if (
       field->rows() == 0 or field->columns() == 0 or
@@ -21,7 +22,7 @@ template <typename Field> bool generate_minefield(Field* field, size_t total_lan
 
     std::uniform_int_distribution<index_type> y_distribution(0, field->rows() - 1);
     std::uniform_int_distribution<index_type> x_distribution(0, field->columns() - 1);
-    std::mt19937_64 rng{std::random_device{}()};
+    std::mt19937_64 rng{seed ? *seed : std::random_device{}()};
 
     size_t placed_count = 0;
     while (placed_count < total_landmines_count)
