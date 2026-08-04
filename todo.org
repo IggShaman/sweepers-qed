@@ -23,6 +23,10 @@
   glpk solver: emit update only when we are done with the whole 15x15 block;
   emit only if anything was changed.
 
+* gui: add "hold right mouse button to pan around"
+  
+* record a clip, add to README.md
+
 * glpk: see if setting a vairable to 0/1 and testing for feasibility is quicker
 
 * storage format: nibble-packed
