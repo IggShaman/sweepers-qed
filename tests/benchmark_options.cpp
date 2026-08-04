@@ -10,19 +10,26 @@ std::expected<CliOptions, int> get_cli_options(int argc, char** argv)
     CliOptions opts;
     argv = app.ensure_utf8(argv);
 
-    app.add_option("--rows", opts.rows, "board rows")->capture_default_str();
-    app.add_option("--columns", opts.columns, "board columns")->capture_default_str();
-    app.add_option("--mine-ratio", opts.mine_ratio, "mine ratio")
-      ->check(CLI::Range(0.0, 0.3))
+    app.add_option("--field-config-file", opts.field_config_file, "toml file with field configs")
       ->capture_default_str();
-    app.add_option("--seed", opts.seed, "rng seed (0 = random)")->capture_default_str();
-    app.add_option("--repeats", opts.repeats, "repetitions")
+    app.add_option("--output-folder", opts.output_folder, "Output folder for benchmark results")
+      ->capture_default_str();
+    app
+      .add_option(
+        "--save-pngs",
+        opts.save_pngs,
+        "For each board, save png file with the final result")
+      ->capture_default_str();
+    app.add_option("--repeats", opts.repeats, "repetitions per field")
       ->check(CLI::PositiveNumber)
       ->capture_default_str();
-    app.add_option("--png", opts.png, "write board image here");
-    app.add_flag("--verbose", opts.verbose, "verbose output");
-    app.add_option("--layout", opts.layout, "storage layout")
+    app.add_option("--layout", opts.layouts, "storage layout(s)")
       ->check(CLI::IsMember({"byte", "nibble", "twobit"}))
+      ->delimiter(',')
+      ->capture_default_str();
+    app.add_option("--solver", opts.solvers, "solver(s)")
+      ->check(CLI::IsMember({"glpk", "or-tools", "highs", "scip", "soplex"}))
+      ->delimiter(',')
       ->capture_default_str();
 
     try

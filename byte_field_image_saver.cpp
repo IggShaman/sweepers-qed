@@ -1,5 +1,9 @@
+#include "byte_field_image_saver.hpp"
+
 #include "byte_field.hpp"
+#include "logger.hpp"
 #include "tests/byte_field_access.hpp"
+
 #include <QImage>
 #include <QList>
 #include <QRgb>
@@ -45,7 +49,7 @@ QList<QRgb> make_palette()
     return palette;
 }
 
-void export_field_to_png(byte_field* field, std::string file_name)
+std::expected<void, std::string> export_field_to_png(byte_field* field, std::string file_name)
 {
     QString file_name_ = QString::fromUtf8(file_name);
 
@@ -58,19 +62,20 @@ void export_field_to_png(byte_field* field, std::string file_name)
       QImage::Format_Indexed8);
     img.setColorTable(make_palette());
 
-    if (field->columns() >= 256 and field->columns() >= 256)
+    if (field->columns() < 256 or field->columns() < 256)
     {
-        img.save(file_name_);
+        img = img.scaled(
+          field->columns() * 8,
+          field->rows() * 8,
+          Qt::KeepAspectRatio,
+          Qt::FastTransformation);
     }
-    else
+
+    if (!img.save(file_name_))
     {
-        img
-          .scaled(
-            field->columns() * 8,
-            field->rows() * 8,
-            Qt::KeepAspectRatio,
-            Qt::FastTransformation)
-          .save(file_name_);
+        return std::unexpected{I_TO_STRING("png save to \"" << file_name << "\" failed")};
     }
+
+    return {};
 }
 } // namespace qed

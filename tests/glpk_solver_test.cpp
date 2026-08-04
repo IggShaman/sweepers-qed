@@ -17,7 +17,8 @@ TEST_CASE_METHOD(qed::glpk_solver_access, "3x3 classic")
         field->cell_at(pos).set_landmine_groundtruth(pos);
     }
 
-    qed::GlpkSolver solver(field);
+    qed::GlpkSolver solver;
+    solver.set_byte_field(field);
 
     {
         qed::field_position c02{0, 2};

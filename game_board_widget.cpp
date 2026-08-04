@@ -144,7 +144,7 @@ void GameBoardWidget::paint_cell(QPainter& painter, qed::field_position position
             if (count)
             {
                 painter.setPen(per_count_colors_text_[count]);
-                painter.drawText(1, kCellSize - 1, QString::number(count));
+                painter.drawText(QRectF(r), Qt::AlignCenter, QString::number(count));
             }
         }
         else

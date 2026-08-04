@@ -16,6 +16,16 @@ Solver::~Solver()
     }
 }
 
+void Solver::set_byte_field(byte_field_ptr field)
+{
+    if (field_)
+    {
+        errlog << "Field already set\n";
+        abort();
+    }
+    field_ = field;
+}
+
 void Solver::startAsync()
 {
     I_ASSERT(

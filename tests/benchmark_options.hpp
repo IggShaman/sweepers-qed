@@ -3,19 +3,18 @@
 #include <cstdint>
 #include <expected>
 #include <string>
+#include <vector>
 
 namespace b
 {
 struct CliOptions
 {
-    int rows{512};
-    int columns{512};
-    double mine_ratio{0.2};
-    std::uint64_t seed{0};
+    std::string field_config_file{"bench_field_configs.toml"};
     int repeats = 5;
-    std::string png;
-    bool verbose{false};
-    std::string layout = "byte";
+    std::string output_folder{"bench_outputs"};
+    bool save_pngs{false};
+    std::vector<std::string> layouts = {"byte"};
+    std::vector<std::string> solvers = {"glpk"};
 };
 
 // This lives in a separate TU due to (alledgedly) heavy compile times with the

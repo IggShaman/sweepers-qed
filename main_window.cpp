@@ -88,7 +88,8 @@ MainWindow::MainWindow() : ui_{new Ui::MainWindow}
 
 void MainWindow::setup_solver()
 {
-    solver_.reset(new qed::GlpkSolver{game_board_widget_->field()});
+    solver_ = std::make_unique<qed::GlpkSolver>();
+    solver_->set_byte_field(game_board_widget_->field());
 
     solver_->setResultHandler(
       [this](auto solver_state, qed::field_position position, const std::string& errmsg)
@@ -108,7 +109,14 @@ void MainWindow::generate_new()
 
     auto field = std::make_shared<qed::byte_field>();
     field->reset(new_rows_, new_columns_);
-    generate_minefield(field.get(), new_landmines_);
+    if (auto ok = generate_minefield(field.get(), new_landmines_); !ok)
+    {
+        QMessageBox::critical(
+          this,
+          "sweepers-qed",
+          "Board generation failed: " + QString::fromUtf8(ok.error()));
+        return;
+    }
 
     game_board_widget_->set_field(field);
 

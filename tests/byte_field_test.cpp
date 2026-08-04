@@ -1,4 +1,5 @@
 #include "byte_field.hpp"
+#include "field.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -140,4 +141,66 @@ TEST_CASE_METHOD(qed::byte_field_access, "cell")
             }
         }
     }
+}
+
+TEST_CASE_METHOD(qed::byte_field_access, "reset_cell")
+{
+    qed::byte_field f;
+    f.reset(3, 3);
+
+    {
+        auto cell = f.cell_at({0, 0});
+        auto v0 = cell.ref.load(std::memory_order_relaxed);
+        cell.set_uncovered();
+        REQUIRE(v0 != cell.ref.load(std::memory_order_relaxed));
+        cell.reset();
+        REQUIRE(v0 == cell.ref.load(std::memory_order_relaxed));
+    }
+
+    {
+        auto cell = f.cell_at({1, 1});
+        auto v0 = cell.ref.load(std::memory_order_relaxed);
+        cell.set_marked_as_landmine();
+        REQUIRE(v0 != cell.ref.load(std::memory_order_relaxed));
+        cell.reset();
+        REQUIRE(v0 == cell.ref.load(std::memory_order_relaxed));
+    }
+
+    {
+        auto pos = qed::field_position{2, 2};
+        auto cell = f.cell_at(pos);
+        auto v0 = cell.ref.load(std::memory_order_relaxed);
+        auto c = f.nearby_landmines_count(pos);
+        REQUIRE(v0 != cell.ref.load(std::memory_order_relaxed));
+        cell.reset();
+        REQUIRE(v0 == cell.ref.load(std::memory_order_relaxed));
+    }
+}
+
+TEST_CASE_METHOD(qed::byte_field_access, "reset_board")
+{
+    qed::byte_field f;
+    f.reset(3, 3);
+
+    auto cell00 = f.cell_at({0, 0});
+    auto v00 = cell00.ref.load(std::memory_order_relaxed);
+    cell00.set_uncovered();
+    REQUIRE(v00 != cell00.ref.load(std::memory_order_relaxed));
+
+    auto cell11 = f.cell_at({1, 1});
+    auto v11 = cell11.ref.load(std::memory_order_relaxed);
+    cell11.set_marked_as_landmine();
+    REQUIRE(v11 != cell11.ref.load(std::memory_order_relaxed));
+
+    auto pos22 = qed::field_position{2, 2};
+    auto cell22 = f.cell_at(pos22);
+    auto v22 = cell22.ref.load(std::memory_order_relaxed);
+    auto _ = f.nearby_landmines_count(pos22);
+    REQUIRE(v22 != cell22.ref.load(std::memory_order_relaxed));
+
+    qed::reset(&f);
+
+    REQUIRE(v00 == cell00.ref.load(std::memory_order_relaxed));
+    REQUIRE(v11 == cell11.ref.load(std::memory_order_relaxed));
+    REQUIRE(v22 == cell22.ref.load(std::memory_order_relaxed));
 }

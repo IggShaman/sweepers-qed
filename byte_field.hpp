@@ -29,6 +29,7 @@ struct byte_field_cell
     void set_marked_as_landmine() const;
     void clear_marked_as_landmine() const;
     int nearby_landmines_count_cached() const;
+    void reset();
 
     std::atomic_ref<std::uint8_t> ref;
 };
@@ -232,5 +233,10 @@ inline int byte_field::nearby_landmines_count(field_position position)
     );
 
     return count;
+}
+
+inline void byte_field_cell::reset()
+{
+    return ref.store(is_landmine_groundtruth() ? kGTMask : 0, std::memory_order_relaxed);
 }
 } // namespace qed

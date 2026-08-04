@@ -1,7 +1,8 @@
 #pragma once
 
-#include <sstream>
+#include <chrono>
 #include <iostream>
+#include <sstream>
 
 #include <strings.h>
 
@@ -54,19 +55,29 @@ public:
     exception(const std::string& message) : runtime_error(message) {}
 };
 
+inline auto current_time()
+{
+    return std::chrono::floor<std::chrono::milliseconds>(std::chrono::system_clock::now());
+}
 } // namespace i
 
-#define errlog i::log_stream(&std::cerr, false)() \
-    << __PRETTY_FUNCTION__ << ' ' << i::strip_path(__FILE__) \
-    << '(' <<  __LINE__ << "): ERROR: "
+#define errlog                                                                                     \
+    i::log_stream(&std::cerr, false)()                                                             \
+      << i::current_time() << __PRETTY_FUNCTION__ << ' ' << i::strip_path(__FILE__) << '('         \
+      << __LINE__ << "): ERROR: "
 
-#define xlog i::log_stream(&std::cerr, false)() \
-    << __PRETTY_FUNCTION__ << ' ' << i::strip_path(__FILE__) \
-    << '(' <<  __LINE__ << "): "
+#define tlog i::log_stream(&std::cerr, false)() << i::current_time() << ": "
 
-#define EX_LOG(V) (std::ostringstream()                        \
-      << __PRETTY_FUNCTION__ << ' ' << i::strip_path(__FILE__) \
-      << '(' <<  __LINE__ << "): " << V).str()
+#define xlog                                                                                       \
+    i::log_stream(&std::cerr, false)() << i::current_time() << ' ' << __PRETTY_FUNCTION__ << ' '   \
+                                       << i::strip_path(__FILE__) << '(' << __LINE__ << "): "
+
+#define EX_LOG(V)                                                                                  \
+    (std::ostringstream() << i::current_time() << ' ' << __PRETTY_FUNCTION__ << ' '                \
+                          << i::strip_path(__FILE__) << '(' << __LINE__ << "): " << V)             \
+      .str()
+
+#define I_TO_STRING(V) (std::ostringstream() << V).str()
 
 #define I_ASSERT(OP, LOG) if (!(OP))                    \
     {                                                   \

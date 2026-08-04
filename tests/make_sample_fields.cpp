@@ -1,38 +1,39 @@
 #include "CLI/CLI.hpp"
 #include "byte_field.hpp"
+#include "field.hpp"
+#include "glpk_solver.hpp"
 #include "logger.hpp"
+#include "minefield_generator.hpp"
+#include "tests/field_config.hpp"
+#include "tests/field_utils.hpp"
+#include "tests/scoped_timer.hpp"
 #include <expected>
 
 namespace b
 {
-void find_empty_initial_pois(qed::byte_field* field, int find_count)
+std::generator<qed::field_position>
+find_empty_initial_pois(qed::byte_field* field, std::optional<size_t> seed)
 {
-    int found{};
+    std::uniform_int_distribution<qed::index_type> y_distribution(0, field->rows() - 1);
+    std::uniform_int_distribution<qed::index_type> x_distribution(0, field->columns() - 1);
+    std::mt19937_64 rng{seed ? *seed : std::random_device{}()};
 
-    for (auto j = static_cast<int>(field->rows() / 2) - 10;
-         j < static_cast<int>(field->rows() / 2) + 10;
-         ++j)
+    while (true)
     {
-        for (auto i = static_cast<int>(field->columns() / 2) - 10;
-             i < static_cast<int>(field->columns() / 2) + 10;
-             ++i)
+        auto position = qed::field_position(y_distribution(rng), x_distribution(rng));
+        auto cell = field->cell_at(position);
+        if (cell.is_landmine_groundtruth() or field->nearby_landmines_count(position) != 0)
         {
-            auto pos = qed::field_position(j, i);
-            auto cell = field->cell_at(pos);
-            if (
-              !cell.is_landmine_groundtruth() and field->nearby_landmines_count(pos) == 0 and
-              ++found <= find_count)
-            {
-                errlog << "pos:" << pos << " cell:" << cell << "\n";
-            }
+            continue;
         }
+        co_yield position;
     }
 }
 
 struct CliOptions
 {
-    int rows{512};
-    int columns{512};
+    int rows{256};
+    int columns{256};
     double mine_ratio{0.2};
     std::uint64_t start_seed{0};
     int fields_count = 100;
@@ -66,6 +67,63 @@ std::expected<CliOptions, int> get_cli_options(int argc, char** argv)
     return opts;
 }
 
+std::expected<void, std::string> make_solvable_field_config(field_config& field_config)
+{
+    tlog << "making config for field " << field_config.name << "\n";
+
+    auto field = std::make_shared<qed::byte_field>();
+    field->reset(field_config.rows, field_config.columns);
+
+    if (auto ok = qed::generate_minefield(
+          field.get(),
+          field_config.calculate_landmine_count(),
+          field_config.seed);
+        !ok)
+    {
+        return std::unexpected{I_TO_STRING("field generation failed: " << ok.error())};
+    }
+
+    for (auto initial_poi : find_empty_initial_pois(field.get(), field_config.seed))
+    {
+        qed::reset(field.get());
+
+        {
+            auto solver = std::make_shared<qed::GlpkSolver>();
+            solver->set_byte_field(field);
+            solver->startAsync();
+
+            field->cell_at(initial_poi).set_uncovered();
+            solver->addPoi(initial_poi);
+
+            {
+                b::scoped_timer timer;
+                solver->resume();
+                solver->wait_for_completion();
+                tlog << "runtime:" << timer.tdiff() << "\n";
+            }
+            solver->stop();
+            solver.reset();
+        }
+
+        auto field_stats = count_field_stats(field.get());
+        auto solved_ratio = static_cast<double>(field_stats.marked_as_mine) / field_stats.landmines;
+        if (solved_ratio >= 0.95)
+        {
+            field_config.initial_pois.push_back(initial_poi);
+            field_config.final_uncovered_positions = field_stats.uncovered;
+            field_config.final_landmines_marked = field_stats.marked_as_mine;
+
+            tlog << "solved_ratio=" << solved_ratio << " => accept\n" << SHOW(field_stats) << "\n";
+
+            return {};
+        }
+
+        tlog << "solved_ratio=" << solved_ratio << ", try again\n";
+    }
+
+    return {};
+}
+
 } // namespace b
 
 int main(int argc, char** argv)
@@ -76,8 +134,32 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    xlog << "TODO; " << config->output_config_file_name << "\n";
+    std::vector<b::field_config> field_configs;
+    size_t seed = config->start_seed;
+    for (int i = 0; i < config->fields_count; ++i, ++seed)
+    {
+        std::ostringstream oss;
+        oss << config->rows << 'x' << config->columns << " seed:" << seed << " idx:" << i;
+        auto name = oss.str();
 
-    // TODO: get some options, make a bunch of fields,
-    // make sure they are solvable, save into a toml config
+        b::field_config field_config{
+          .name = name,
+          .rows = config->rows,
+          .columns = config->columns,
+          .landmine_fill_rate = config->mine_ratio,
+          .seed = seed};
+
+        if (!b::make_solvable_field_config(field_config))
+        {
+            return -1;
+        }
+
+        field_configs.push_back(field_config);
+    }
+
+    if (auto ok = save_field_configs(config->output_config_file_name, field_configs); !ok)
+    {
+        errlog << "Could not save configs: " << ok.error() << "\n";
+        return -1;
+    }
 }

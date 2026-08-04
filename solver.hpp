@@ -33,9 +33,9 @@ public:
 
     using result_handler_type = std::function<void(SolverState, field_position, std::string)>;
 
-    explicit Solver(byte_field_ptr field) : field_{field} {}
     virtual ~Solver();
 
+    void set_byte_field(byte_field_ptr);
     void startAsync();
     void suspend();
     void resume();

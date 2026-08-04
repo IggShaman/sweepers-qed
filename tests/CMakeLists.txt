@@ -49,6 +49,7 @@ add_executable(
   solver_benchmark
   solver_benchmark.cpp
   benchmark_options.cpp
+  benchmark_runner.cpp
 )
 target_include_directories(solver_benchmark PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(

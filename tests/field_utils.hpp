@@ -1,6 +1,6 @@
 #include "byte_field.hpp"
 
-namespace qed
+namespace b
 {
 struct field_stats
 {
@@ -41,8 +41,8 @@ field_stats count_field_stats(auto* field)
 
 inline std::ostream& operator<<(std::ostream& os, const field_stats& stats)
 {
-    os << "     landmines: " << stats.landmines << "\n     uncovered: " << stats.uncovered
-       << "\nmarked_as_mine: " << stats.marked_as_mine;
+    os << "{landmines:" << stats.landmines << " uncovered:" << stats.uncovered
+       << " marked_as_mine:" << stats.marked_as_mine << '}';
     return os;
 }
-} // namespace qed
+} // namespace b

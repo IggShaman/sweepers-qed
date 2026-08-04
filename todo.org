@@ -1,11 +1,12 @@
-* solver benchmark [4/8]
+* solver benchmark [6/9]
 - [X] headless
 - [X] benchmark: pin to efficiency cores
 - [X] save result as png
 - [X] read field_config from a toml file
-- [ ] implement make_sample_fields: generate, save to a toml file
-- [ ] save 100 seeded large fields
-- [ ] run each a few times, print/save results
+- [X] implement make_sample_fields: generate, save to a toml file
+- [X] save 100 seeded large fields
+- [ ] run each a few times, save results to e.g. a toml or sqlite file
+- [ ] visualize results interactively
 - [ ] move to benchmarks/ toplevel folder?
 
 * glpk frontier

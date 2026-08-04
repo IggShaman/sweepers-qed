@@ -3,19 +3,21 @@
 #include "field_position.hpp"
 
 #include <cstddef>
+#include <expected>
 #include <random>
 
 namespace qed
 {
 // For regular fill rates (<= 20%), this should work fine.
 template <typename Field>
-bool generate_minefield(Field* field, size_t total_landmines_count, std::optional<size_t> seed = {})
+std::expected<void, std::string>
+generate_minefield(Field* field, size_t total_landmines_count, std::optional<size_t> seed = {})
 {
     if (
       field->rows() == 0 or field->columns() == 0 or
       total_landmines_count >= field->rows() * field->columns())
     {
-        return false;
+        return std::unexpected{"incorrect field configuration"};
     }
 
     field->total_landmines_count = total_landmines_count;
@@ -38,6 +40,6 @@ bool generate_minefield(Field* field, size_t total_landmines_count, std::optiona
         ++placed_count;
     }
 
-    return true;
+    return {};
 }
 } // namespace qed
