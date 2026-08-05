@@ -1,5 +1,8 @@
 #include "benchmark_stats.hpp"
 
+#include "build_info.hpp"
+#include "logger.hpp"
+
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -138,6 +141,48 @@ log_solver_step_stats(const std::string& dsn, const std::vector<solver_step_stat
           q.addBindValue(qlonglong(s.frontier_size));
           q.addBindValue(qlonglong(s.uncovered_count));
           q.addBindValue(qlonglong(s.marked_count));
+
+          return true;
+      });
+}
+
+struct name_value
+{
+    std::string name;
+    std::string value;
+};
+
+std::expected<void, std::string> log_build_info(const std::string& dsn)
+{
+    static const QString create_table_sql{"CREATE TABLE IF NOT EXISTS build_info("
+                                          " name VARCHAR,"
+                                          " value VARCHAR,"
+                                          " PRIMARY KEY(name)) WITHOUT ROWID"};
+
+    static const QString insert_row_sql{"INSERT INTO build_info VALUES (?,?)"};
+
+    std::vector<name_value> rows = std::initializer_list<name_value>{
+      {"git_sha", build_info::git_sha},
+      {"git_describe", build_info::git_describe},
+      {"git_dirty", i::to_string(build_info::git_dirty)},
+      {"compiler_id", build_info::compiler_id},
+      {"compiler_ver", build_info::compiler_ver},
+      {"build_type", build_info::build_type},
+      {"cxx_flags", build_info::cxx_flags},
+      {"cxx_standard", build_info::cxx_standard},
+      {"system_name", build_info::system_name},
+      {"system_proc", build_info::system_proc},
+    };
+
+    return log_samples<name_value>(
+      dsn,
+      rows,
+      create_table_sql,
+      insert_row_sql,
+      [](QSqlQuery& q, const name_value& s) -> bool
+      {
+          q.addBindValue(QString::fromUtf8(s.name));
+          q.addBindValue(QString::fromUtf8(s.value));
 
           return true;
       });

@@ -36,6 +36,29 @@ FetchContent_Declare(tomlplusplus
 FetchContent_MakeAvailable(tomlplusplus)
 
 #
+# build info
+#
+string(TOUPPER "${CMAKE_BUILD_TYPE}" _bt_upper)
+set(BUILD_INFO_HPP ${CMAKE_BINARY_DIR}/generated/build_info.hpp)
+
+add_custom_target(generate_build_info ALL
+  COMMAND ${CMAKE_COMMAND}
+    -D "SRC_DIR=${CMAKE_SOURCE_DIR}"
+    -D "IN_FILE=${CMAKE_SOURCE_DIR}/cmake/build_info.hpp.in"
+    -D "OUT_FILE=${BUILD_INFO_HPP}"
+    -D "CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}"
+    -D "CXX_COMPILER_VERSION=${CMAKE_CXX_COMPILER_VERSION}"
+    -D "BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+    -D "CXX_FLAGS=${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_bt_upper}}"
+    -D "CXX_STANDARD=${CMAKE_CXX_STANDARD}"
+    -D "SYSTEM_NAME=${CMAKE_SYSTEM_NAME}"
+    -D "SYSTEM_PROC=${CMAKE_SYSTEM_PROCESSOR}"
+    -P "${CMAKE_SOURCE_DIR}/cmake/GenerateBuildInfo.cmake"
+  BYPRODUCTS ${BUILD_INFO_HPP}
+  COMMENT "Capturing build info"
+  VERBATIM)
+
+#
 # qed_core: model + solvers, no Qt or UI
 #
 add_library(
@@ -49,6 +72,9 @@ target_include_directories(qed_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(qed_core PUBLIC Threads::Threads GLPK::GLPK)
 target_compile_features(qed_core PUBLIC cxx_std_26)
 set_target_properties(qed_core PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
+# qed_core hosts build_info
+add_dependencies(qed_core generate_build_info)
+target_include_directories(qed_core PUBLIC ${CMAKE_BINARY_DIR}/generated)
 
 #
 # qed_debug: helpers for debugging, unit tests, benchmarks

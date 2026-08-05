@@ -28,6 +28,8 @@ struct solver_step_stats
     size_t marked_count{};
 };
 
+std::expected<void, std::string> log_build_info(const std::string& dsn);
+
 std::expected<void, std::string>
 log_solver_run_stats(const std::string& dsn, const std::vector<solver_run_stats>&);
 
