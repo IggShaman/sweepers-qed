@@ -1,6 +1,6 @@
 #include "byte_field.hpp"
 #include "byte_field_access.hpp"
-#include "field_utils.hpp"
+#include "field_stats.hpp"
 #include "minefield_generator.hpp"
 
 #include <catch2/catch_test_macros.hpp>

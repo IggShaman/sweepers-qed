@@ -64,6 +64,53 @@ target_compile_features(qed_debug PUBLIC cxx_std_26)
 set_target_properties(qed_debug PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
 
 #
+# make_sample_fields
+#
+add_executable(
+  make_sample_fields
+  make_sample_fields.cpp
+)
+target_include_directories(make_sample_fields PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(make_sample_fields PRIVATE benchmark_base CLI11::CLI11 qed_core)
+set_target_properties(make_sample_fields PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
+
+#
+# benchmarking
+#
+
+add_library(
+  benchmark_base
+  field_config.cpp
+  benchmark_stats.cpp
+)
+target_include_directories(benchmark_base PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(
+  benchmark_base
+  PRIVATE
+  qed_core
+  qed_debug
+  tomlplusplus::tomlplusplus
+  Qt6::Sql
+)
+set_target_properties(benchmark_base PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
+
+add_executable(
+  solver_benchmark
+  solver_benchmark.cpp
+  benchmark_options.cpp
+  benchmark_runner.cpp
+)
+target_include_directories(solver_benchmark PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(
+  solver_benchmark
+  PRIVATE
+  benchmark_base
+  CLI11::CLI11
+  Qt6::Sql
+)
+set_target_properties(solver_benchmark PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
+
+#
 # The GUI application
 #
 qt_add_executable(

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tests/field_config.hpp"
+#include "field_config.hpp"
 
 #include <chrono>
 #include <expected>

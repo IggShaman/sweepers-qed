@@ -1,6 +1,6 @@
+#include "benchmark_options.hpp"
+#include "benchmark_runner.hpp"
 #include "logger.hpp"
-#include "tests/benchmark_options.hpp"
-#include "tests/benchmark_runner.hpp"
 
 #include <QCoreApplication>
 

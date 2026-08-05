@@ -1,5 +1,5 @@
+#include "benchmark_stats.hpp"
 #include "logger.hpp"
-#include "tests/benchmark_stats.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 

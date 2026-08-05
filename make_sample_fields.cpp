@@ -1,12 +1,12 @@
 #include "CLI/CLI.hpp"
 #include "byte_field.hpp"
 #include "field.hpp"
+#include "field_config.hpp"
+#include "field_stats.hpp"
 #include "glpk_solver.hpp"
 #include "logger.hpp"
 #include "minefield_generator.hpp"
-#include "tests/field_config.hpp"
-#include "tests/field_utils.hpp"
-#include "tests/scoped_timer.hpp"
+#include "scoped_timer.hpp"
 #include <expected>
 
 namespace b

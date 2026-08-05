@@ -1,4 +1,4 @@
-#include "tests/field_config.hpp"
+#include "field_config.hpp"
 #include "logger.hpp"
 
 #include <toml++/toml.hpp>

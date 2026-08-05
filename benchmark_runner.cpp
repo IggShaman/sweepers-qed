@@ -1,13 +1,12 @@
-#include "tests/benchmark_runner.hpp"
+#include "benchmark_runner.hpp"
+#include "benchmark_options.hpp"
 #include "byte_field_image_saver.hpp"
-#include "field_utils.hpp"
+#include "field_config.hpp"
+#include "field_stats.hpp"
 #include "glpk_solver.hpp"
-#include "glpk_solver_access.hpp"
 #include "logger.hpp"
 #include "minefield_generator.hpp"
-#include "tests/benchmark_options.hpp"
-#include "tests/field_config.hpp"
-#include "tests/scoped_timer.hpp"
+#include "scoped_timer.hpp"
 
 namespace b
 {

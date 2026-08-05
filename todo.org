@@ -1,13 +1,13 @@
-* solver benchmark [6/9]
+* solver benchmark [7/9]
 - [X] headless
 - [X] benchmark: pin to efficiency cores
 - [X] save result as png
 - [X] read field_config from a toml file
 - [X] implement make_sample_fields: generate, save to a toml file
 - [X] save 100 seeded large fields
+- [X] move to the toplevel folder
 - [ ] save benchmark stats into an sqlite db
 - [ ] initial viz with python/html
-- [ ] move to the toplevel folder
 
 * glpk frontier
 - [ ] review

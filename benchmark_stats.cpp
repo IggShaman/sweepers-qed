@@ -1,4 +1,4 @@
-#include "tests/benchmark_stats.hpp"
+#include "benchmark_stats.hpp"
 
 #include <QSqlDatabase>
 #include <QSqlError>

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "tests/benchmark_options.hpp"
-#include "tests/field_config.hpp"
+#include "benchmark_options.hpp"
+#include "field_config.hpp"
+
 #include <vector>
 
 namespace b
