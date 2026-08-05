@@ -4,9 +4,12 @@ project(SWEEPERS_QED CXX)
 SET(CMAKE_CXX_STANDARD 26)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Threads REQUIRED)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+find_package(Threads REQUIRED)
+find_package(GLPK 5.0 REQUIRED)
+
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Sql)
 qt_standard_project_setup()
 
 SET(CMAKE_AUTOMOC ON)
@@ -43,7 +46,7 @@ add_library(
 )
 
 target_include_directories(qed_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(qed_core PUBLIC Threads::Threads glpk)
+target_link_libraries(qed_core PUBLIC Threads::Threads GLPK::GLPK)
 target_compile_features(qed_core PUBLIC cxx_std_26)
 set_target_properties(qed_core PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
 
@@ -76,7 +79,8 @@ target_link_libraries(
   PRIVATE
   qed_core
   Qt6::Core
-  Qt6::Widgets)
+  Qt6::Widgets
+)
 
 include(CTest)
 if(BUILD_TESTING)

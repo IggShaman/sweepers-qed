@@ -59,6 +59,13 @@ inline auto current_time()
 {
     return std::chrono::floor<std::chrono::milliseconds>(std::chrono::system_clock::now());
 }
+
+template <typename... Ts> [[nodiscard]] std::string to_string(const Ts&... vs)
+{
+    std::ostringstream oss;
+    (void)(oss << ... << vs);
+    return oss.str();
+}
 } // namespace i
 
 #define errlog                                                                                     \
@@ -95,3 +102,6 @@ inline auto current_time()
 
 #define SHOW(...) #__VA_ARGS__ "=" << (__VA_ARGS__)
 #define SHOW_(...) #__VA_ARGS__ "=" << (__VA_ARGS__) << ' '
+
+#define ARG_SHOW(...) #__VA_ARGS__ "=", (__VA_ARGS__)
+#define ARG_SHOW_(...) #__VA_ARGS__ "=", (__VA_ARGS__), ' '

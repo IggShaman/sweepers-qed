@@ -2,8 +2,12 @@
 #include "tests/benchmark_options.hpp"
 #include "tests/benchmark_runner.hpp"
 
+#include <QCoreApplication>
+
 int main(int argc, char** argv)
 {
+    QCoreApplication app(argc, argv);
+
     const auto cli_opts = b::get_cli_options(argc, argv);
     if (!cli_opts)
     {

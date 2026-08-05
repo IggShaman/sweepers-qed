@@ -18,9 +18,11 @@ std::expected<void, std::string> benchmark_runner::init(const CliOptions& opts)
     auto field_configs = b::load_field_configs(opts.field_config_file);
     if (!field_configs)
     {
-        return std::unexpected{I_TO_STRING(
-          "Failed to load field configs from \"" << opts.field_config_file
-                                                 << "\": " << field_configs.error())};
+        return std::unexpected{i::to_string(
+          "Failed to load field configs from \"",
+          opts.field_config_file,
+          "\": ",
+          field_configs.error())};
     }
 
     field_configs_ = *field_configs;

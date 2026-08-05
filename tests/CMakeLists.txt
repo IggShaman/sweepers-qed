@@ -23,6 +23,11 @@ target_include_directories(glpk_solver_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(glpk_solver_test PRIVATE Catch2::Catch2WithMain qed_core)
 set_target_properties(glpk_solver_test PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
 
+add_executable(benchmark_test benchmark_test.cpp)
+target_include_directories(benchmark_test PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(benchmark_test PRIVATE Catch2::Catch2WithMain benchmarks_base Qt6::Core Qt6::Sql)
+set_target_properties(benchmark_test PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
+
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(Catch)
 
@@ -31,10 +36,12 @@ catch_discover_tests(aligned_allocator_test)
 catch_discover_tests(byte_field_test)
 catch_discover_tests(generate_minefield_test)
 catch_discover_tests(glpk_solver_test)
+catch_discover_tests(benchmark_test)
 
 add_library(
   benchmarks_base
   field_config.cpp
+  benchmark_stats.cpp
 )
 target_include_directories(benchmarks_base PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(
@@ -42,7 +49,9 @@ target_link_libraries(
   PRIVATE
   qed_core
   qed_debug
-  tomlplusplus::tomlplusplus)
+  tomlplusplus::tomlplusplus
+  Qt6::Sql
+)
 set_target_properties(benchmarks_base PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
 
 add_executable(
@@ -56,7 +65,9 @@ target_link_libraries(
   solver_benchmark
   PRIVATE
   benchmarks_base
-  CLI11::CLI11)
+  CLI11::CLI11
+  Qt6::Sql
+)
 set_target_properties(solver_benchmark PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
 
 add_executable(

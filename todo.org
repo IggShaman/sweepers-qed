@@ -5,9 +5,9 @@
 - [X] read field_config from a toml file
 - [X] implement make_sample_fields: generate, save to a toml file
 - [X] save 100 seeded large fields
-- [ ] run each a few times, save results to e.g. a toml or sqlite file
-- [ ] visualize results interactively
-- [ ] move to benchmarks/ toplevel folder?
+- [ ] save benchmark stats into an sqlite db
+- [ ] initial viz with python/html
+- [ ] move to the toplevel folder
 
 * glpk frontier
 - [ ] review
