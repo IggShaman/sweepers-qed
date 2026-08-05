@@ -31,8 +31,6 @@ std::expected<void, std::string> benchmark_runner::init(const CliOptions& opts)
 
 std::expected<void, std::string> benchmark_runner::run()
 {
-    // TODO: make sure output folder exists and is empty
-
     for (const auto& solver_name : options_.solvers)
     {
         for (const auto& layout_name : options_.layouts)

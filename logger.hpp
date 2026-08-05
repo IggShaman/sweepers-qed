@@ -70,7 +70,7 @@ template <typename... Ts> [[nodiscard]] std::string to_string(const Ts&... vs)
 
 #define errlog                                                                                     \
     i::log_stream(&std::cerr, false)()                                                             \
-      << i::current_time() << __PRETTY_FUNCTION__ << ' ' << i::strip_path(__FILE__) << '('         \
+      << i::current_time() << ' ' << __PRETTY_FUNCTION__ << ' ' << i::strip_path(__FILE__) << '('  \
       << __LINE__ << "): ERROR: "
 
 #define tlog i::log_stream(&std::cerr, false)() << i::current_time() << ": "

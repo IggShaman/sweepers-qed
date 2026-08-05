@@ -35,7 +35,18 @@ std::vector<qed::field_position> load_pois(const toml::node_view<const toml::nod
 
 std::expected<std::vector<field_config>, std::string> load_field_configs(std::string file_name)
 {
-    const toml::table doc = toml::parse_file(file_name);
+    toml::table doc;
+    try
+    {
+        doc = toml::parse_file(file_name);
+    }
+    catch (const toml::parse_error& ex)
+    {
+        const auto& pos = ex.source().begin;
+        return std::unexpected{
+          i::to_string(file_name, ":", pos.line, ":", pos.column, ": ", ex.description())};
+    }
+
     std::vector<field_config> out;
 
     if (const auto* array = doc["config"].as_array())
