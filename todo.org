@@ -1,4 +1,4 @@
-* solver benchmark [7/9]
+* solver benchmark [8/10]
 - [X] headless
 - [X] benchmark: pin to efficiency cores
 - [X] save result as png
@@ -6,15 +6,20 @@
 - [X] implement make_sample_fields: generate, save to a toml file
 - [X] save 100 seeded large fields
 - [X] move to the toplevel folder
-- [ ] save benchmark stats into an sqlite db
-- [ ] initial viz with python/html
+- [X] save run stats into an sqlite db
+- [ ] async stats collector [0/4]
+  - [ ] separate std::jthread
+  - [ ] sample at a certain preconfigured pace (cliopts?), default 10ms
+  - [ ] collect to in-memory struct, dump to sqlite at the end
+  - [ ] make solver inherit a base class that provides APIs for reading stats?
+- [ ] initial viz [0/2]
+  - [ ] try python/html
+  - [ ] try duckdb's interfaces
+  - [ ] make basic dashboards
 
-* glpk frontier
-- [ ] review
-- [ ] benchmark: skip poi if its 8-neigh is fully solved
-- [ ] measure frontier size (collect stats, plot)
-  Use pre-saved large fields for this.
-- [ ] benchmark: poi queue: stack rather than a deque
+* glpk: benchmark: skip poi if its 8-neigh is fully solved
+* glpk: benchmark: poi queue: stack rather than a deque, for more locality
+* glpk: benchmark: keep retrying same LP for all unfixed variables for as long as any progress is made
 
 * solver_generation for solver callbacks into gui thread
   protects against UB access when a field is updated, but a callback
@@ -33,7 +38,6 @@
 * storage format: nibble-packed
 
 * storage format: bit-packed split (2 bits per state, separate bitpacked gt)
-
 
 * benchmark fields
 - [ ] for access/update

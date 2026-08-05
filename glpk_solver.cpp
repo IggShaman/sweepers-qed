@@ -44,7 +44,11 @@ bool GlpkSolver::test_block(lp::problem& lp_problem, variables_map_type& vars)
     {
         lp_problem.set_objective_coefficient(v.second, 1);
         lp_problem.set_maximize();
-        lp_problem.solve();
+        if (auto ok = lp_problem.solve(); !ok)
+        {
+            errlog << lp_problem.errmsg(ok.error()) << "\n";
+            return false;
+        }
 
         auto obj = lp_problem.get_objective_value();
 
@@ -77,7 +81,11 @@ bool GlpkSolver::test_block(lp::problem& lp_problem, variables_map_type& vars)
         else
         {
             lp_problem.set_minimize();
-            lp_problem.solve();
+            if (auto ok = lp_problem.solve(); !ok)
+            {
+                errlog << lp_problem.errmsg(ok.error()) << "\n";
+                return false;
+            }
             obj = lp_problem.get_objective_value();
             if (obj >= kEpsilon) // must have a mine here
             {

@@ -60,6 +60,7 @@ std::expected<std::vector<field_config>, std::string> load_field_configs(std::st
               .columns = static_cast<qed::index_type>(t["columns"].value_or(0)),
               .landmine_fill_rate = t["landmine_fill_rate"].value_or(0.0),
               .seed = static_cast<std::uint64_t>(t["seed"].value_or(0)),
+              .initial_pois = load_pois(t["initial_pois"]),
               .final_uncovered_positions =
                 static_cast<std::size_t>(t["final_uncovered_positions"].value_or(0)),
               .final_landmines_marked =

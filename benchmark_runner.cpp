@@ -1,5 +1,6 @@
 #include "benchmark_runner.hpp"
 #include "benchmark_options.hpp"
+#include "benchmark_stats.hpp"
 #include "byte_field_image_saver.hpp"
 #include "field_config.hpp"
 #include "field_stats.hpp"
@@ -40,7 +41,7 @@ std::expected<void, std::string> benchmark_runner::run()
             {
                 for (int repeat_idx = 0; repeat_idx < options_.repeats; ++repeat_idx)
                 {
-                    auto ok = run(solver_name, layout_name, field_config_idx, repeat_idx);
+                    auto ok = run(layout_name, solver_name, field_config_idx, repeat_idx);
                     if (!ok)
                     {
                         return std::unexpected{I_TO_STRING(
@@ -62,6 +63,9 @@ std::expected<void, std::string> benchmark_runner::run(
   size_t field_config_idx,
   int repeat_idx)
 {
+    const auto run_id = run_id_seq_++;
+    const auto dsn = I_TO_STRING(options_.experiment_path << "/stats.sqlite");
+
     if (layout_name != "byte")
     {
         return std::unexpected{I_TO_STRING(SHOW_(layout_name) << "is not currently supported")};
@@ -72,13 +76,16 @@ std::expected<void, std::string> benchmark_runner::run(
         return std::unexpected{I_TO_STRING(SHOW_(solver_name) << "is not currently supported")};
     }
 
-    if (field_configs_.size() >= field_config_idx)
+    if (field_config_idx >= field_configs_.size())
     {
         return std::unexpected{
           I_TO_STRING(SHOW(field_config_idx) << " >= " << SHOW(field_configs_.size()))};
     }
 
     const auto& field_config = field_configs_[field_config_idx];
+
+    tlog << "running experiment: field:" << field_config.name << " solver:" << solver_name
+         << " layout:" << layout_name << " repeat:" << repeat_idx << "\n";
 
     auto field = std::make_shared<qed::byte_field>();
     field->reset(field_config.rows, field_config.columns);
@@ -122,7 +129,18 @@ std::expected<void, std::string> benchmark_runner::run(
         b::scoped_timer timer;
         solver->resume();
         solver->wait_for_completion();
-        tlog << "runtime:" << timer.tdiff() << "\n";
+
+        solver_run_stats run_stats{
+          .run_id = run_id,
+          .runtime_ms = timer.tdiff(),
+          .field_config_ = field_config,
+        };
+
+        tlog << "runtime:" << run_stats.runtime_ms << "\n";
+        if (auto ok = log_solver_run_stats(dsn, {run_stats}); !ok)
+        {
+            return std::unexpected{ok.error()};
+        }
     }
 
     solver->stop();
@@ -150,9 +168,9 @@ std::expected<void, std::string> benchmark_runner::run(
 
     if (repeat_idx == 0 and options_.save_pngs)
     {
-        if (auto ok =
-              qed::export_field_to_png(field.get(), I_TO_STRING(field_config.name << ".png"));
-            !ok)
+        auto png_file_name =
+          I_TO_STRING(options_.experiment_path << '/' << field_config.name << ".png");
+        if (auto ok = qed::export_field_to_png(field.get(), png_file_name); !ok)
         {
             return std::unexpected{ok.error()};
         }

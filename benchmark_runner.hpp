@@ -18,5 +18,8 @@ public:
 private:
     std::vector<field_config> field_configs_;
     CliOptions options_;
+    std::string make_dsn();
+
+    int run_id_seq_{0};
 };
 } // namespace b
