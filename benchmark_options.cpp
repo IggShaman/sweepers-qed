@@ -11,15 +11,22 @@ namespace qed
 {
 std::expected<CliOptions, std::string> augment_opts(CliOptions& cli_opts)
 {
-    if (cli_opts.experiment_path.empty())
+    if (cli_opts.experiment_name.empty())
     {
         std::ostringstream oss;
         const auto now_ms =
           std::chrono::floor<std::chrono::milliseconds>(std::chrono::system_clock::now());
-        oss << cli_opts.experiments_base_folder << '/';
         std::print(oss, "{:%FT%TZ}", now_ms);
-        cli_opts.experiment_path = oss.str();
+        cli_opts.experiment_name = oss.str();
     }
+
+    if (!cli_opts.experiment_path.empty())
+    {
+        return std::unexpected{"internal error: experiment_path is nonempty"};
+    }
+
+    cli_opts.experiment_path =
+      I_TO_STRING(cli_opts.experiments_base_folder << '/' << cli_opts.experiment_name);
 
     {
         QDir dir;
@@ -28,8 +35,6 @@ std::expected<CliOptions, std::string> augment_opts(CliOptions& cli_opts)
             return std::unexpected{I_TO_STRING("Failed to mkdir -p " << cli_opts.experiment_path)};
         }
     }
-
-    cli_opts.experiment_name = std::filesystem::path{cli_opts.experiment_path}.filename().string();
 
     return {cli_opts};
 }
@@ -44,11 +49,11 @@ std::expected<CliOptions, std::string> get_cli_options(int argc, char** argv)
       ->capture_default_str();
     app
       .add_option(
-        "--experiments-folder",
+        "--experiments-base-folder",
         opts.experiments_base_folder,
         "Base folder for all experiments")
       ->capture_default_str();
-    app.add_option("--experiment-name", opts.experiment_name, "Will be provided unless specified")
+    app.add_option("--experiment-name", opts.experiment_name, "Defaults to current date-time")
       ->capture_default_str();
     app
       .add_option(
@@ -74,6 +79,11 @@ std::expected<CliOptions, std::string> get_cli_options(int argc, char** argv)
     }
     catch (const CLI::ParseError& ex)
     {
+        // --help, --help-all, --version
+        if (ex.get_exit_code() == 0)
+        {
+            std::exit(app.exit(ex));
+        }
         return std::unexpected{i::to_string(ex.get_name(), ": ", ex.what())};
     }
 

@@ -89,10 +89,12 @@ log_solver_run_stats(const std::string& dsn, const std::vector<solver_run_stats>
                                           // initial_pois: do not add
                                           " final_uncovered_positions INTEGER NOT NULL,"
                                           " final_landmines_marked INTEGER NOT NULL, "
+                                          " solver_name VARCHAR NOT NULL,"
+                                          " layout_name VARCHAR NOT NULL,"
 
                                           " PRIMARY KEY(run_id)) WITHOUT ROWID"};
 
-    static const QString insert_row_sql{"INSERT INTO solver_run VALUES (?,?,?,?,?,?,?,?,?)"};
+    static const QString insert_row_sql{"INSERT INTO solver_run VALUES (?,?,?,?,?,?,?,?,?,?,?)"};
 
     return log_samples<solver_run_stats>(
       dsn,
@@ -110,6 +112,8 @@ log_solver_run_stats(const std::string& dsn, const std::vector<solver_run_stats>
           q.addBindValue(qlonglong(s.field_config_.seed));
           q.addBindValue(qlonglong(s.field_config_.final_uncovered_positions));
           q.addBindValue(qlonglong(s.field_config_.final_landmines_marked));
+          q.addBindValue(QString::fromUtf8(s.solver_name));
+          q.addBindValue(QString::fromUtf8(s.layout_name));
 
           return true;
       });

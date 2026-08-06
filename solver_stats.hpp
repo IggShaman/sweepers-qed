@@ -6,19 +6,19 @@
 
 namespace qed
 {
-using ms_duration_type = std::chrono::duration<double, std::milli>;
-
 struct solver_run_stats
 {
     int run_id;
-    ms_duration_type runtime_ms;
+    std::chrono::milliseconds runtime_ms;
     field_config field_config_;
+    std::string solver_name;
+    std::string layout_name;
 };
 
 struct solver_step_stats
 {
     int run_id;
-    ms_duration_type at;
+    std::chrono::milliseconds at;
 
     size_t frontier_size{};
     size_t uncovered_count{};

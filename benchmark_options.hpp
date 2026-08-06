@@ -12,9 +12,8 @@ struct CliOptions
     std::string field_config_file{"bench_field_configs.toml"};
     int repeats = 5;
     std::string experiments_base_folder{"experiments"};
-    std::string experiment_path{};
-    // never specified, always inferred as the experiment_path's final compoment
     std::string experiment_name{};
+    std::string experiment_path{}; // always computed, never provided via cli
     bool save_pngs{false};
     std::vector<std::string> layouts = {"byte"};
     std::vector<std::string> solvers = {"glpk"};

@@ -28,6 +28,11 @@ target_include_directories(benchmark_test PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(benchmark_test PRIVATE Catch2::Catch2WithMain benchmark_base Qt6::Core Qt6::Sql)
 set_target_properties(benchmark_test PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
 
+add_executable(stats_sampler_test stats_sampler_test.cpp)
+target_include_directories(stats_sampler_test PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(stats_sampler_test PRIVATE Catch2::Catch2WithMain benchmark_base Qt6::Core Qt6::Sql)
+set_target_properties(stats_sampler_test PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
+
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(Catch)
 
@@ -37,3 +42,4 @@ catch_discover_tests(byte_field_test)
 catch_discover_tests(generate_minefield_test)
 catch_discover_tests(glpk_solver_test)
 catch_discover_tests(benchmark_test)
+catch_discover_tests(stats_sampler_test)

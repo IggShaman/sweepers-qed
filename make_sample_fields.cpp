@@ -101,7 +101,7 @@ std::expected<void, std::string> make_solvable_field_config(field_config& field_
                 qed::scoped_timer timer;
                 solver->resume();
                 solver->wait_for_completion();
-                tlog << "runtime:" << timer.tdiff() << "\n";
+                tlog << "runtime:" << timer.get_elapsed_ms() << "\n";
             }
             solver->stop();
             solver.reset();

@@ -50,3 +50,28 @@ Archived entries from file /home/igor/sweepers-qed/todo.org
 - [X] ut for generate_minefield
 - [X] use atomics with relaxed read/write - necessary for halo cells
 
+
+* solver benchmark [10/10]
+:PROPERTIES:
+:ARCHIVE_TIME: 2026-08-06 Thu 17:30
+:ARCHIVE_FILE: ~/sweepers-qed/todo.org
+:ARCHIVE_CATEGORY: todo
+:END:
+- [X] headless
+- [X] benchmark: pin to efficiency cores
+- [X] save result as png
+- [X] read field_config from a toml file
+- [X] implement make_sample_fields: generate, save to a toml file
+- [X] save 100 seeded large fields
+- [X] move to the toplevel folder
+- [X] save run stats into an sqlite db
+- [X] async stats collector [4/4]
+  - [X] separate std::jthread
+  - [X] sample at a certain preconfigured pace (cliopts?), default 10ms
+  - [X] make solver inherit a base class that provides APIs for reading stats
+  - [X] collect to in-memory struct, dump to sqlite at the end
+- [X] initial viz [3/3]
+  - [X] try python/html
+  - [X] try duckdb's interfaces
+  - [X] make basic dashboards
+

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "logger.hpp"
-#include "solver_stats.hpp"
+#include "solver_stats_provider.hpp"
 
 #include <chrono>
 #include <thread>
@@ -12,8 +12,15 @@ namespace qed
 template <typename Sample> class stats_sampler
 {
 public:
-    explicit stats_sampler(solver_stats<Sample>* stats_source, std::chrono::milliseconds interval)
-        : stats_source_{stats_source}, interval_{interval}
+    stats_sampler(const stats_sampler&) = delete;
+    stats_sampler(stats_sampler&&) = delete;
+    stats_sampler& operator=(const stats_sampler&) = delete;
+    stats_sampler& operator=(stats_sampler&&) = delete;
+    stats_sampler(
+      int run_id,
+      solver_stats_provider<Sample>* stats_source,
+      std::chrono::milliseconds interval)
+        : run_id_{run_id}, stats_source_{stats_source}, interval_{interval}
     {
     }
 
@@ -26,7 +33,8 @@ private:
 
     std::vector<Sample> samples_;
 
-    solver_stats<Sample> stats_source_{};
+    int run_id_{};
+    solver_stats_provider<Sample>* stats_source_{};
     std::chrono::milliseconds interval_{10};
     std::jthread thread_;
     std::chrono::steady_clock::time_point t0_;
@@ -46,7 +54,11 @@ std::tuple<std::vector<Sample>, std::chrono::milliseconds> stats_sampler<Sample>
     {
         thread_.join();
     }
-    return {std::move(samples_), std::chrono::steady_clock::now() - t0_};
+
+    return {
+      std::move(samples_),
+      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t0_),
+    };
 }
 
 template <typename Sample> void stats_sampler<Sample>::run(std::stop_token stop_token)
@@ -86,7 +98,18 @@ template <typename Sample> void stats_sampler<Sample>::save_sample(uint32_t skip
         errlog << SHOW(skipped_samples) << "\n";
     }
 
-    sample->at = std::chrono::steady_clock::now() - t0_;
-    samples_.push_back(*sample);
+    auto at =
+      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t0_);
+
+    sample->run_id = run_id_;
+    sample->at = at;
+    if (!samples_.empty() and samples_.back().at == at)
+    {
+        samples_.back() = *sample;
+    }
+    else
+    {
+        samples_.push_back(*sample);
+    }
 }
 } // namespace qed

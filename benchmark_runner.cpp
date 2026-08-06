@@ -9,6 +9,7 @@
 #include "logger.hpp"
 #include "minefield_generator.hpp"
 #include "scoped_timer.hpp"
+#include "stats_sampler.hpp"
 
 namespace qed
 {
@@ -126,6 +127,12 @@ std::expected<void, std::string> benchmark_runner::run(
         solver->addPoi(poi);
     }
 
+    qed::stats_sampler<solver_step_stats> stats_sampler_(
+      run_id,
+      solver.get(),
+      std::chrono::milliseconds{10});
+    stats_sampler_.start();
+
     {
         qed::scoped_timer timer;
         solver->resume();
@@ -133,14 +140,26 @@ std::expected<void, std::string> benchmark_runner::run(
 
         solver_run_stats run_stats{
           .run_id = run_id,
-          .runtime_ms = timer.tdiff(),
+          .runtime_ms = timer.get_elapsed_ms(),
           .field_config_ = field_config,
+          .solver_name = solver_name,
+          .layout_name = layout_name,
         };
-
         tlog << "runtime:" << run_stats.runtime_ms << "\n";
-        if (auto ok = log_solver_run_stats(dsn, {run_stats}); !ok)
+
         {
-            return std::unexpected{ok.error()};
+            qed::scoped_timer save_timer;
+            if (auto ok = log_solver_run_stats(dsn, {run_stats}); !ok)
+            {
+                return std::unexpected{ok.error()};
+            }
+
+            auto [step_stats, _] = stats_sampler_.stop_and_take();
+            if (auto ok = log_solver_step_stats(dsn, std::move(step_stats)); !ok)
+            {
+                return std::unexpected{ok.error()};
+            }
+            tlog << "stats saved in " << save_timer.get_elapsed_ms() << "\n";
         }
     }
 

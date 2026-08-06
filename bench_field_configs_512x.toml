@@ -1,0 +1,159 @@
+[[config]]
+columns = 1024
+final_landmines_marked = 209055
+final_uncovered_positions = 837938
+initial_pois = [ [ 924, 942 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:0'
+rows = 1024
+seed = 0
+
+[[config]]
+columns = 1024
+final_landmines_marked = 209086
+final_uncovered_positions = 837975
+initial_pois = [ [ 219, 377 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:1'
+rows = 1024
+seed = 1
+
+[[config]]
+columns = 1024
+final_landmines_marked = 208939
+final_uncovered_positions = 837577
+initial_pois = [ [ 539, 43 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:2'
+rows = 1024
+seed = 2
+
+[[config]]
+columns = 1024
+final_landmines_marked = 209119
+final_uncovered_positions = 838009
+initial_pois = [ [ 610, 377 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:3'
+rows = 1024
+seed = 3
+
+[[config]]
+columns = 1024
+final_landmines_marked = 209031
+final_uncovered_positions = 837742
+initial_pois = [ [ 413, 600 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:4'
+rows = 1024
+seed = 4
+
+[[config]]
+columns = 1024
+final_landmines_marked = 209057
+final_uncovered_positions = 837858
+initial_pois = [ [ 781, 567 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:5'
+rows = 1024
+seed = 5
+
+[[config]]
+columns = 1024
+final_landmines_marked = 209009
+final_uncovered_positions = 837822
+initial_pois = [ [ 304, 771 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:6'
+rows = 1024
+seed = 6
+
+[[config]]
+columns = 1024
+final_landmines_marked = 209198
+final_uncovered_positions = 838034
+initial_pois = [ [ 680, 536 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:7'
+rows = 1024
+seed = 7
+
+[[config]]
+columns = 1024
+final_landmines_marked = 209062
+final_uncovered_positions = 837856
+initial_pois = [ [ 954, 18 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:8'
+rows = 1024
+seed = 8
+
+[[config]]
+columns = 1024
+final_landmines_marked = 208932
+final_uncovered_positions = 837455
+initial_pois = [ [ 93, 663 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:9'
+rows = 1024
+seed = 9
+
+[[config]]
+columns = 1024
+final_landmines_marked = 208968
+final_uncovered_positions = 837659
+initial_pois = [ [ 762, 328 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:10'
+rows = 1024
+seed = 10
+
+[[config]]
+columns = 1024
+final_landmines_marked = 209222
+final_uncovered_positions = 838235
+initial_pois = [ [ 166, 812 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:11'
+rows = 1024
+seed = 11
+
+[[config]]
+columns = 1024
+final_landmines_marked = 209199
+final_uncovered_positions = 838147
+initial_pois = [ [ 884, 170 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:12'
+rows = 1024
+seed = 12
+
+[[config]]
+columns = 1024
+final_landmines_marked = 209168
+final_uncovered_positions = 838031
+initial_pois = [ [ 283, 405 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:13'
+rows = 1024
+seed = 13
+
+[[config]]
+columns = 1024
+final_landmines_marked = 209177
+final_uncovered_positions = 838150
+initial_pois = [ [ 479, 945 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:14'
+rows = 1024
+seed = 14
+
+[[config]]
+columns = 1024
+final_landmines_marked = 209117
+final_uncovered_positions = 838039
+initial_pois = [ [ 335, 999 ] ]
+landmine_fill_rate = 0.20000000000000001
+name = '1024x1024 seed:15'
+rows = 1024
+seed = 15

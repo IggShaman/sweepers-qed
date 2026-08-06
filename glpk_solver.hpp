@@ -26,6 +26,9 @@ private:
     bool doPoi(field_position) override;
     void prepare_block(lp::problem&, field_position, variables_map_type&);
     bool test_block(lp::problem&, variables_map_type&);
-};
 
+    std::atomic<size_t> frontier_size_{};
+    std::atomic<size_t> uncovered_count_{};
+    std::atomic<size_t> marked_count_{};
+};
 } // namespace qed

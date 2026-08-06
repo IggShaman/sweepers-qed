@@ -5,6 +5,11 @@
 
 namespace qed
 {
+inline void add_relaxed(std::atomic<std::size_t>& counter, size_t value)
+{
+    counter.store(counter.load(std::memory_order_relaxed) + value, std::memory_order_relaxed);
+}
+
 struct lp_constraint_desc
 {
     lp_constraint_desc(int _fixed_value, std::string _name) : fixed_value{_fixed_value}, name{_name}
@@ -23,6 +28,8 @@ GlpkSolver::~GlpkSolver()
 
 bool GlpkSolver::doPoi(field_position poi)
 {
+    add_relaxed(frontier_size_, -1);
+
     auto poi_cell = field_->cell_at(poi);
 
     lp::problem lp_problem;
@@ -39,7 +46,6 @@ bool GlpkSolver::test_block(lp::problem& lp_problem, variables_map_type& vars)
         return true;
     }
 
-    // TODO: go over variables in a radial manner around the center
     for (auto& v : vars)
     {
         lp_problem.set_objective_coefficient(v.second, 1);
@@ -70,12 +76,17 @@ bool GlpkSolver::test_block(lp::problem& lp_problem, variables_map_type& vars)
                 return false;
             }
 
-            cell.set_uncovered();
-            lp_problem.set_column_fixed_bound(v.second, 0);
-            if (result_handler_)
             {
-                result_handler_(SolverState::kSolved, v.first, {});
+                add_relaxed(uncovered_count_, 1);
+                cell.set_uncovered();
+                lp_problem.set_column_fixed_bound(v.second, 0);
+                if (result_handler_)
+                {
+                    result_handler_(SolverState::kSolved, v.first, {});
+                }
             }
+
+            add_relaxed(frontier_size_, 1);
             addPoi(v.first);
         }
         else
@@ -105,12 +116,15 @@ bool GlpkSolver::test_block(lp::problem& lp_problem, variables_map_type& vars)
                     return false;
                 }
 
+                add_relaxed(marked_count_, 1);
                 cell.set_marked_as_landmine();
                 lp_problem.set_column_fixed_bound(v.second, 1);
                 if (result_handler_)
                 {
                     result_handler_(SolverState::kSolved, v.first, {});
                 }
+
+                add_relaxed(frontier_size_, 1);
                 addPoi(v.first);
             }
         }
@@ -241,8 +255,10 @@ void GlpkSolver::prepare_block(
 
 std::expected<solver_step_stats, std::string> GlpkSolver::take_stats_sample()
 {
-    // TODO
-    return {};
+    return solver_step_stats{
+      .frontier_size = frontier_size(),
+      .uncovered_count = uncovered_count_.load(std::memory_order_relaxed),
+      .marked_count = marked_count_.load(std::memory_order_relaxed),
+    };
 }
-
 } // namespace qed

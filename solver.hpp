@@ -48,6 +48,7 @@ public:
     // itself ends up in a "suspended" state.
     // Don't forget to run the solver first.
     void wait_for_completion();
+    size_t frontier_size();
 
 protected:
     virtual bool doPoi(field_position) = 0;

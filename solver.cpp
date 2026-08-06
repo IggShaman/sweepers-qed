@@ -140,4 +140,10 @@ void Solver::wait_for_completion()
 
     cond_.wait(lock, [this] { return state_ == RunState::kSuspended; });
 }
+
+size_t Solver::frontier_size()
+{
+    std::lock_guard<std::mutex> lock{queue_mutex_};
+    return poi_.size();
+}
 } // namespace qed
