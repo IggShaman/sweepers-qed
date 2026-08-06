@@ -1,6 +1,8 @@
 #pragma once
 
 #include "byte_field.hpp"
+#include "solver_stats.hpp"
+#include "solver_stats_provider.hpp"
 
 #include <condition_variable>
 #include <deque>
@@ -11,7 +13,7 @@ namespace qed
 {
 using byte_field_ptr = std::shared_ptr<byte_field>;
 
-class Solver
+class Solver : public solver_stats_provider<solver_step_stats>
 {
     friend struct solver_access;
 

@@ -2,14 +2,16 @@
 #include "byte_field.hpp"
 #include "field.hpp"
 #include "field_config.hpp"
+#include "field_config_io.hpp"
 #include "field_stats.hpp"
 #include "glpk_solver.hpp"
 #include "logger.hpp"
 #include "minefield_generator.hpp"
 #include "scoped_timer.hpp"
+
 #include <expected>
 
-namespace b
+namespace qed
 {
 std::generator<qed::field_position>
 find_empty_initial_pois(qed::byte_field* field, std::optional<size_t> seed)
@@ -96,7 +98,7 @@ std::expected<void, std::string> make_solvable_field_config(field_config& field_
             solver->addPoi(initial_poi);
 
             {
-                b::scoped_timer timer;
+                qed::scoped_timer timer;
                 solver->resume();
                 solver->wait_for_completion();
                 tlog << "runtime:" << timer.tdiff() << "\n";
@@ -124,32 +126,36 @@ std::expected<void, std::string> make_solvable_field_config(field_config& field_
     return {};
 }
 
-} // namespace b
+} // namespace qed
 
 int main(int argc, char** argv)
 {
-    auto config = b::get_cli_options(argc, argv);
+    auto config = qed::get_cli_options(argc, argv);
     if (!config)
     {
         return -1;
     }
 
-    std::vector<b::field_config> field_configs;
+    std::vector<qed::field_config> field_configs;
     size_t seed = config->start_seed;
     for (int i = 0; i < config->fields_count; ++i, ++seed)
     {
         std::ostringstream oss;
-        oss << config->rows << 'x' << config->columns << " seed:" << seed << " idx:" << i;
+        oss << config->rows << 'x' << config->columns << " seed:" << seed;
+        if (seed != i)
+        {
+            oss << " idx:" << i;
+        }
         auto name = oss.str();
 
-        b::field_config field_config{
+        qed::field_config field_config{
           .name = name,
           .rows = config->rows,
           .columns = config->columns,
           .landmine_fill_rate = config->mine_ratio,
           .seed = seed};
 
-        if (!b::make_solvable_field_config(field_config))
+        if (!qed::make_solvable_field_config(field_config))
         {
             return -1;
         }

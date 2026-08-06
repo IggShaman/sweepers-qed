@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace b
+namespace qed
 {
 struct CliOptions
 {
@@ -23,4 +23,4 @@ struct CliOptions
 // This lives in a separate TU due to (alledgedly) heavy compile times with the
 // CLI library.
 std::expected<CliOptions, std::string> get_cli_options(int argc, char** argv);
-} // namespace b
+} // namespace qed

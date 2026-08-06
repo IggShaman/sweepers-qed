@@ -3,19 +3,20 @@
 #include "benchmark_stats.hpp"
 #include "byte_field_image_saver.hpp"
 #include "field_config.hpp"
+#include "field_config_io.hpp"
 #include "field_stats.hpp"
 #include "glpk_solver.hpp"
 #include "logger.hpp"
 #include "minefield_generator.hpp"
 #include "scoped_timer.hpp"
 
-namespace b
+namespace qed
 {
 std::expected<void, std::string> benchmark_runner::init(const CliOptions& opts)
 {
     options_ = opts;
 
-    auto field_configs = b::load_field_configs(opts.field_config_file);
+    auto field_configs = load_field_configs(opts.field_config_file);
     if (!field_configs)
     {
         return std::unexpected{i::to_string(
@@ -126,7 +127,7 @@ std::expected<void, std::string> benchmark_runner::run(
     }
 
     {
-        b::scoped_timer timer;
+        qed::scoped_timer timer;
         solver->resume();
         solver->wait_for_completion();
 
@@ -178,4 +179,4 @@ std::expected<void, std::string> benchmark_runner::run(
 
     return {};
 }
-} // namespace b
+} // namespace qed

@@ -7,7 +7,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-namespace b
+namespace qed
 {
 template <typename Sample>
 std::expected<void, std::string> log_samples(
@@ -187,4 +187,4 @@ std::expected<void, std::string> log_build_info(const std::string& dsn)
           return true;
       });
 }
-} // namespace b
+} // namespace qed

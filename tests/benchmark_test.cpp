@@ -29,10 +29,10 @@ TEST_CASE("log_solver_run_stats")
     // temp_dir.setAutoRemove(false);
     // system(I_TO_STRING("ls -al " << dsn.toStdString()).data());
 
-    std::vector<b::solver_run_stats> samples;
+    std::vector<qed::solver_run_stats> samples;
     samples.push_back(
       {.run_id = 10,
-       .runtime_ms = b::ms_duration_type{500},
+       .runtime_ms = qed::ms_duration_type{500},
        .field_config_ = {
          .name = "test name",
          .rows = 1,
@@ -43,7 +43,7 @@ TEST_CASE("log_solver_run_stats")
          .final_landmines_marked = 20}});
     samples.push_back({
       .run_id = 20,
-      .runtime_ms = b::ms_duration_type{1500},
+      .runtime_ms = qed::ms_duration_type{1500},
       .field_config_ =
         {.name = "test name 2",
          .rows = 11,
@@ -54,7 +54,7 @@ TEST_CASE("log_solver_run_stats")
          .final_landmines_marked = (1ull << 63) + 3},
     });
 
-    auto ok = b::log_solver_run_stats(dsn.toStdString(), samples);
+    auto ok = qed::log_solver_run_stats(dsn.toStdString(), samples);
     if (!ok)
     {
         errlog << ok.error() << "\n";
@@ -109,30 +109,30 @@ TEST_CASE("log_solver_step_stats")
     // temp_dir.setAutoRemove(false);
     // system(I_TO_STRING("ls -al " << dsn.toStdString()).data());
 
-    std::vector<b::solver_step_stats> samples;
+    std::vector<qed::solver_step_stats> samples;
     samples.push_back({
       .run_id = 1,
-      .at = b::ms_duration_type{100},
+      .at = qed::ms_duration_type{100},
       .frontier_size = 1,
       .uncovered_count = 0,
       .marked_count = 2,
     });
     samples.push_back({
       .run_id = 1,
-      .at = b::ms_duration_type{200},
+      .at = qed::ms_duration_type{200},
       .frontier_size = 2,
       .uncovered_count = 3,
       .marked_count = 4,
     });
     samples.push_back({
       .run_id = 2,
-      .at = b::ms_duration_type{1},
+      .at = qed::ms_duration_type{1},
       .frontier_size = 100,
       .uncovered_count = 200,
       .marked_count = 300,
     });
 
-    auto ok = b::log_solver_step_stats(dsn.toStdString(), samples);
+    auto ok = qed::log_solver_step_stats(dsn.toStdString(), samples);
     if (!ok)
     {
         errlog << ok.error() << "\n";

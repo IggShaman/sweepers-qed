@@ -5,7 +5,7 @@
 
 #include <vector>
 
-namespace b
+namespace qed
 {
 class benchmark_runner
 {
@@ -22,4 +22,4 @@ private:
 
     int run_id_seq_{0};
 };
-} // namespace b
+} // namespace qed

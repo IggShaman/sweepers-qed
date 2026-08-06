@@ -20,6 +20,8 @@ public:
 
     ~GlpkSolver() override;
 
+    std::expected<solver_step_stats, std::string> take_stats_sample() override;
+
 private:
     bool doPoi(field_position) override;
     void prepare_block(lp::problem&, field_position, variables_map_type&);

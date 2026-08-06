@@ -7,7 +7,7 @@
 
 #include <chrono>
 
-namespace b
+namespace qed
 {
 std::expected<CliOptions, std::string> augment_opts(CliOptions& cli_opts)
 {
@@ -79,4 +79,4 @@ std::expected<CliOptions, std::string> get_cli_options(int argc, char** argv)
 
     return augment_opts(opts);
 }
-} // namespace b
+} // namespace qed

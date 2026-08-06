@@ -1,6 +1,6 @@
 #include "byte_field.hpp"
 
-namespace b
+namespace qed
 {
 struct field_stats
 {
@@ -45,4 +45,4 @@ inline std::ostream& operator<<(std::ostream& os, const field_stats& stats)
        << " marked_as_mine:" << stats.marked_as_mine << '}';
     return os;
 }
-} // namespace b
+} // namespace qed

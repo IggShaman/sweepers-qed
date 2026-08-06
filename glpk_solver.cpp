@@ -239,4 +239,10 @@ void GlpkSolver::prepare_block(
     }
 }
 
+std::expected<solver_step_stats, std::string> GlpkSolver::take_stats_sample()
+{
+    // TODO
+    return {};
+}
+
 } // namespace qed

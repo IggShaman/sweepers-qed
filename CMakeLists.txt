@@ -103,11 +103,10 @@ set_target_properties(make_sample_fields PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTO
 #
 # benchmarking
 #
-
 add_library(
   benchmark_base
-  field_config.cpp
   benchmark_stats.cpp
+  field_config_io.cpp
 )
 target_include_directories(benchmark_base PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(

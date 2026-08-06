@@ -1,9 +1,10 @@
 #include "field_config.hpp"
 #include "logger.hpp"
 
+#include <expected>
 #include <toml++/toml.hpp>
 
-namespace b
+namespace qed
 {
 std::vector<qed::field_position> load_pois(const toml::node_view<const toml::node>& n)
 {
@@ -104,4 +105,4 @@ save_field_configs(std::string file_name, const std::vector<field_config>& field
 
     return {};
 }
-} // namespace b
+} // namespace qed

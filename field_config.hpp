@@ -2,10 +2,9 @@
 
 #include "field_position.hpp"
 
-#include <expected>
 #include <vector>
 
-namespace b
+namespace qed
 {
 struct field_config
 {
@@ -23,9 +22,4 @@ struct field_config
         return static_cast<size_t>(static_cast<size_t>(rows) * columns * landmine_fill_rate);
     }
 };
-
-std::expected<std::vector<field_config>, std::string> load_field_configs(std::string file_name);
-
-std::expected<void, std::string>
-save_field_configs(std::string file_name, const std::vector<field_config>&);
-} // namespace b
+} // namespace qed
